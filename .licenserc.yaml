@@ -12,14 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-VERSION ?= latest
+header:
+  license:
+    spdx-id: Apache-2.0
+    copyright-owner: Hoshea Jiang
 
-install:
-	pip install -r requirements.txt
+  paths-ignore:
+    - '**/*.md'
+    - '**/*.txt'
+    - 'LICENSE'
+    - '.github/**'
+    - '.gitignore'
+    - '**/.pytest_cache/**'
 
-lint:
-	pip install -r requirements-style.txt
-	flake8 .
-
-ut: install
-	pytest
+  comment: on-failure

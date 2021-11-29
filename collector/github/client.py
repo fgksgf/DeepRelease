@@ -1,3 +1,17 @@
+# Copyright 2021 Hoshea Jiang
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 from typing import Tuple
 
@@ -17,6 +31,12 @@ class Client:
         self.client = Github(token)
 
     def query_without_variables(self, query):
+        """
+        Use `requests.post` to make the API call without variables.
+
+        :param query:
+        :return:
+        """
         response = requests.post(self.api_url,
                                  json={'query': query},
                                  headers=self.headers)
@@ -27,7 +47,7 @@ class Client:
 
     def query_with_variables(self, query, variables):
         """
-        A simple function to use `requests.post` to make the API call.
+        Use `requests.post` to make the API call with variables.
 
         :param query:
         :param variables:
@@ -42,6 +62,14 @@ class Client:
             raise Exception("Query failed to run by returning code of {}. {}".format(response.status_code, query))
 
     def get_pull_request_info(self, owner, name, num):
+        """
+        Get the information of a pull request.
+
+        :param owner: the owner of the repository.
+        :param name: the name of the repository.
+        :param num: the number of the pull request.
+        :return:
+        """
         query = '''
             query($owner : String!, $name: String!, $num: Int!) {
                 repository(name: $name, owner: $owner) {
@@ -71,6 +99,7 @@ class Client:
     def get_last_release(self, owner: str, name: str) -> Tuple[str, str]:
         """
         Get the last release's commit hash and date in GitTimestamp.
+
         :param owner: the owner of the repository.
         :param name: the name of the repository.
         :return: (commit, date)
@@ -87,6 +116,7 @@ class Client:
     def get_pull_requests_since(self, owner: str, name: str, since: str):
         """
         Get all pull requests since a certain commit.
+
         :param owner: the owner of the repository.
         :param name: the name of the repository.
         :param since: the commit hash to start from, in GitTimestamp format.
@@ -104,7 +134,7 @@ class Client:
                       associatedPullRequests(first: 1) {
                         nodes {
                           url
-                        } 
+                        }
                       }
                     }
                   }
