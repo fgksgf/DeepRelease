@@ -18,7 +18,7 @@ install:
 	pip install -r requirements.txt
 
 lint:
-	pip install -r requirements-style.txt
+	pip install flake8
 	flake8 .
 
 ut: install

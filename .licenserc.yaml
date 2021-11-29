@@ -21,6 +21,7 @@ header:
     - '**/*.md'
     - '**/*.txt'
     - 'LICENSE'
+    - '.flake8'
     - '.github/**'
     - '.gitignore'
     - '**/.pytest_cache/**'
