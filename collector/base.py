@@ -12,14 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-VERSION ?= latest
+from abc import ABC, abstractmethod
 
-install:
-	pip install -r requirements.txt
 
-lint:
-	pip install flake8
-	flake8 .
+class Collector(ABC):
+    def __init__(self, client):
+        self.client = client
 
-ut: install
-	pytest
+    @abstractmethod
+    def get_all_since_last_release(self, owner, name):
+        """
+        Get all releases data since the last release.
+
+        :param owner: the owner of the repository.
+        :param name: the name of the repository.
+        :return:
+        """
+        pass

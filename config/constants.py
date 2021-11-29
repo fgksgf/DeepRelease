@@ -12,14 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-VERSION ?= latest
-
-install:
-	pip install -r requirements.txt
-
-lint:
-	pip install flake8
-	flake8 .
-
-ut: install
-	pytest
+class Constants:
+    GITHUB_API_URL = 'https://api.github.com/graphql'
