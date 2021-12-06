@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from collector.base import Collector
-from collector.github.model.pull_request import PullRequest
+from entity.pull_request import PullRequest
 from collector.github.utils.url_utils import check_pull_request_url
 
 

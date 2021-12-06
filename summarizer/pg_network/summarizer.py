@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-VERSION ?= latest
+from summarizer.base import Summarizer
 
-install:
-	pip install -r requirements.txt
 
-lint:
-	flake8 --version || pip install flake8
-	flake8 .
+class EntrySummarizer(Summarizer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-ut: install
-	pytest
+    def preprocess(self, items):
+        pass
+
+    def summarize(self, items):
+        pass
