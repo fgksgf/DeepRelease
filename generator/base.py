@@ -12,14 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-VERSION ?= latest
+from abc import ABC, abstractmethod
 
-install:
-	pip install -r requirements.txt
 
-lint:
-	flake8 --version || pip install flake8
-	flake8 .
+class Generator(ABC):
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
 
-ut: install
-	pytest
+    @abstractmethod
+    def generate(self, entries, categories, **kwargs):
+        pass

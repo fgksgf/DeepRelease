@@ -12,14 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-VERSION ?= latest
+from generator.base import Generator
 
-install:
-	pip install -r requirements.txt
 
-lint:
-	flake8 --version || pip install flake8
-	flake8 .
+class MarkdownGenerator(Generator):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-ut: install
-	pytest
+    def generate(self, entries, categories, **kwargs):
+        pass

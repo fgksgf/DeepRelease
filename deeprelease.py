@@ -18,6 +18,9 @@ import fire
 
 from collector.github.client import Client
 from collector.github.pull_requests_collector import PullRequestsCollector
+from discriminator.fasttext.discriminator import CategoryDiscriminator
+from generator.markdown.generator import MarkdownGenerator
+from summarizer.pg_network.summarizer import EntrySummarizer
 
 
 class DeepRelease:
@@ -27,11 +30,13 @@ class DeepRelease:
         """
         Init DeepRelease.
 
-        :param token: the github personal access token.
+        :param token: the GitHub personal access token.
         """
-        self.token = token
         self.client = Client(token)
         self.prc = PullRequestsCollector(self.client)
+        self.summarizer = EntrySummarizer()
+        self.discriminator = CategoryDiscriminator()
+        self.generator = MarkdownGenerator()
 
     def run(self, owner='', repo=''):
         """
@@ -41,7 +46,10 @@ class DeepRelease:
         :param repo: the name of the repo.
         :return:
         """
-        pass
+        prs = self.prc.get_all_since_last_release(owner, repo)
+        entries = self.summarizer.summarize(prs)
+        categories = self.discriminator.classify(prs)
+        self.generator.generate(entries, categories)
 
 
 if __name__ == '__main__':
