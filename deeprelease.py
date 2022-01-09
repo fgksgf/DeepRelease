@@ -27,26 +27,28 @@ class DeepRelease:
     """DeepRelease CLI."""
 
     def __init__(self, token=''):
-        """
-        Init DeepRelease.
+        """Initialize DeepRelease's components.
 
-        :param token: the GitHub personal access token.
+        Args:
+            token: the GitHub personal access token.
         """
         self.client = Client(token)
-        self.prc = PullRequestsCollector(self.client)
+        self.collector = PullRequestsCollector(self.client)
         self.summarizer = EntrySummarizer()
         self.discriminator = CategoryDiscriminator()
         self.generator = MarkdownGenerator()
 
     def run(self, owner='', repo=''):
-        """
-        Run DeepRelease.
+        """Run DeepRelease.
 
-        :param owner: the owner of the repo.
-        :param repo: the name of the repo.
-        :return:
+        Args:
+            owner: the owner of the repo.
+            repo: the name of the repo.
+
+        Returns:
+            None.
         """
-        prs = self.prc.get_all_since_last_release(owner, repo)
+        prs = self.collector.get_all_since_last_release(owner, repo)
         entries = self.summarizer.summarize(prs)
         categories = self.discriminator.classify(prs)
         self.generator.generate(entries, categories)

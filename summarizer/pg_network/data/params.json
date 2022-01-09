@@ -1,0 +1,42 @@
+{
+    "data_dir": "data",
+    "data_file_suffix": "prs-0605-70.csv",
+    "vocab_path": "data/vocab.json",
+    "model_root": "model/",
+
+    "hidden_dim": 256,
+    "embed_dim": 128,
+    "batch_size": 8,
+    "max_enc_steps": 400,
+    "max_dec_steps": 100,
+    "beam_size": 4,
+    "min_dec_steps": 3,
+    "vocab_size": 30000,
+
+    "eps": 1e-12,
+    "max_iterations": 40000,
+
+    "optim": "Adam",
+    "lr": 0.0001,
+    "reoptim": true,
+    "teacher_forcing_ratio": 1,
+
+    "pointer_gen": true,
+
+    "is_coverage": false,
+    "lr_coverage": 0.15,
+    "cov_loss_wt": 1.0,
+
+    "train_ml": true,
+    "train_rl": true,
+    "rl_weight": 0.9984,
+
+    "device": "cpu",
+    "eval_device": "cpu",
+
+    "summary_flush_interval": 100,
+    "print_interval": 200,
+    "eval_print_interval": 1000,
+    "test_print_interval": 1000,
+    "save_interval": 1000
+}
