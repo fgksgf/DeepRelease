@@ -11,8 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from enum import Enum
 
-class Category:
-    def __init__(self, _id, name):
-        self.id = _id
-        self.name = name
+
+class Category(Enum):
+    Features = 0
+    F = 0
+
+    BugFixes = 1
+    B = 1
+
+    Documentation = 2
+    D = 2
+
+    NonFunctional = 3
+    N = 3
+
+
+class EntryCategory:
+    def __init__(self, entry_id, category: Category):
+        self.entry_id = entry_id
+        self.category = category

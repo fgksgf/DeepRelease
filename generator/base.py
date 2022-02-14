@@ -14,11 +14,56 @@
 
 from abc import ABC, abstractmethod
 
+from entity.category import EntryCategory
+from entity.entry import Entry
+from entity.group import Group
+
 
 class Generator(ABC):
     def __init__(self, **kwargs):
         self.kwargs = kwargs
 
     @abstractmethod
-    def generate(self, entries, categories, **kwargs):
+    def merge(self, entries: [Entry], categories: [EntryCategory], order='FBDN', **kwargs):
+        """
+        Merge entries that are in the same category.
+
+        Args:
+            entries: A list of change entries.
+            categories: A list of change categories.
+            order: The order of the categories.
+            **kwargs:
+
+        Returns:
+            A list of groups.
+        """
+        pass
+
+    @abstractmethod
+    def generate(self, entries: [Entry], categories: [EntryCategory], **kwargs):
+        """
+        Generate the release note, the entry point of the generator.
+
+        Args:
+            entries: A list of change entries.
+            categories: A list of change categories.
+            **kwargs:
+
+        Returns:
+
+        """
+        pass
+
+    @abstractmethod
+    def generate_content(self, groups: [Group], **kwargs):
+        """
+        Generate the release note's content according to the list of groups.
+
+        Args:
+            groups:
+            **kwargs:
+
+        Returns:
+
+        """
         pass
