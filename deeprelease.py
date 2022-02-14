@@ -33,7 +33,7 @@ class DeepRelease:
         :param token: the GitHub personal access token.
         """
         self.client = Client(token)
-        self.prc = PullRequestsCollector(self.client)
+        self.collector = PullRequestsCollector(self.client)
         self.summarizer = EntrySummarizer()
         self.discriminator = CategoryDiscriminator()
         self.generator = MarkdownGenerator()
@@ -46,7 +46,7 @@ class DeepRelease:
         :param repo: the name of the repo.
         :return:
         """
-        prs = self.prc.get_all_since_last_release(owner, repo)
+        prs = self.collector.get_all_since_last_release(owner, repo)
         entries = self.summarizer.summarize(prs)
         categories = self.discriminator.classify(prs)
         self.generator.generate(entries, categories)

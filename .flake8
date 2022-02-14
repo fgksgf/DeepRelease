@@ -3,8 +3,12 @@ max-line-length = 120
 ignore =
     D100,
     D101,
+    D102,
     D104,
+    D105,
     D107,
+    D414,
+    DAR002,
     DAR101,
     DAR201,
     DAR401,
