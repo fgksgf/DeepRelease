@@ -1,4 +1,19 @@
+# Copyright 2022 Hoshea Jiang
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # Most of this file is copied form https://github.com/abisee/pointer-generator/blob/master/batcher.py
+
 import os
 import queue
 import time
@@ -12,6 +27,7 @@ from . import data
 
 import random
 
+# TODO: replace tensorflow log with logging
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 tf.get_logger().setLevel('ERROR')
 random.seed(1234)
@@ -19,7 +35,6 @@ np.random.seed(318)
 
 
 class Example(object):
-
     def __init__(self, params, id, article, abstract, vocab):
         # Get ids of special tokens
         start_decoding = vocab.word2id(data.START_DECODING)
@@ -74,13 +89,13 @@ class Example(object):
         return inp, target
 
     def pad_decoder_inp_targ(self, max_len, pad_id):
-        self.dec_input.extend( [pad_id] * (max_len - len(self.dec_input)) )
-        self.target.extend( [pad_id] * (max_len - len(self.target)) )
+        self.dec_input.extend([pad_id] * (max_len - len(self.dec_input)))
+        self.target.extend([pad_id] * (max_len - len(self.target)))
 
     def pad_encoder_input(self, max_len, pad_id):
-        self.enc_input.extend( [pad_id] * (max_len - len(self.enc_input)) )
+        self.enc_input.extend([pad_id] * (max_len - len(self.enc_input)))
         if self.params.pointer_gen:
-            self.enc_input_extend_vocab.extend( [pad_id] * (max_len - len(self.enc_input_extend_vocab)) )
+            self.enc_input_extend_vocab.extend([pad_id] * (max_len - len(self.enc_input_extend_vocab)))
 
 
 class Batch(object):
@@ -105,7 +120,6 @@ class Batch(object):
         self.enc_batch = np.zeros((self.batch_size, max_enc_seq_len), dtype=np.int32)
         # self.enc_padding_mask = np.zeros((self.batch_size, max_enc_seq_len), dtype=np.float32)
         self.enc_lens = np.zeros((self.batch_size), dtype=np.int32)
-
 
         # Fill in the numpy arrays
         for i, ex in enumerate(example_list):
@@ -214,7 +228,8 @@ class Batcher(object):
                 (ex_id, article, abstract) = next(
                     input_gen)  # read the next example from file. article and abstract are both strings.
             except StopIteration:  # if there are no more examples:
-                tf.compat.v1.logging.info("The example generator for this example queue filling thread has exhausted data.")
+                tf.compat.v1.logging.info(
+                    "The example generator for this example queue filling thread has exhausted data.")
                 if self._single_pass:
                     tf.compat.v1.logging.info(
                         "single_pass mode is on, so we've finished reading dataset. This thread is stopping.")

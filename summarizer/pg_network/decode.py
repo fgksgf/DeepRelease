@@ -1,7 +1,18 @@
-# encoding=utf-8
+# Copyright 2022 Hoshea Jiang
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import os
-import sys
 import time
 import copy
 import torch
@@ -9,11 +20,10 @@ import torch
 from . import utils
 from .pointer_model import PointerEncoderDecoder
 
-from prsum.dataset import data
-from prsum.dataset.data import Vocab
-from prsum.dataset.batcher import Batcher
-from prsum.dataset.train_util import get_input_from_batch
-from rouge import Rouge
+from .dataset import data
+from .dataset.data import Vocab
+from .dataset.batcher import Batcher
+from .dataset.train_util import get_input_from_batch
 
 
 def get_rouge_ref_dir(decode_dir):
@@ -34,7 +44,7 @@ class Beam(object):
         self.ngram_set = ngram_set
 
     def extend(self, token, log_prob, state, context, coverage, new_3gram):
-        if self.ngram_set == None:
+        if self.ngram_set is None:
             ngram_set = None
         else:
             ngram_set = copy.copy(self.ngram_set)
@@ -42,9 +52,9 @@ class Beam(object):
 
         return Beam(tokens=self.tokens + [token],
                     log_probs=self.log_probs + [log_prob],
-                    state = state,
-                    context = context,
-                    coverage = coverage,
+                    state=state,
+                    context=context,
+                    coverage=coverage,
                     ngram_set=ngram_set)
 
     def get_new_3gram(self, token):
@@ -99,10 +109,6 @@ class BeamSearch(object):
         return sorted(beams, key=lambda h: h.avg_log_prob, reverse=True)
 
     def decode(self):
-        inference_start = time.clock()
-        start = time.time()
-        counter = 0
-        refs = []
         hyps = []
         batch = self.batcher.next_batch()
         while batch is not None:
@@ -114,34 +120,11 @@ class BeamSearch(object):
             article_oovs = batch.art_oovs[0] if self.params.pointer_gen else None
             decoded_words = data.outputids2decwords(output_ids, self.vocab, article_oovs, self.params.pointer_gen)
 
-            # there four duplicate exmaples, so we just need one of them
-            original_abstract = batch.original_abstracts[0]
-
-            utils.write_for_rouge(original_abstract, decoded_words, counter,
-                                  self._rouge_ref_dir, self._rouge_dec_dir)
             hyps.append(utils.prepare_rouge_text(" ".join(decoded_words)))
-            refs.append(utils.prepare_rouge_text(original_abstract))
-            counter += 1
-            if counter % self.params.eval_print_interval == 0:
-                print('%d example in %d sec' % (counter, time.time() - start))
-                sys.stdout.flush()
-                start = time.time()
 
             batch = self.batcher.next_batch()
 
-        print("Finish inference in %d ms" % ((time.clock() - inference_start)*1000))
-
-        print("Decoder has finished reading dataset for single_pass.")
-        rouge = Rouge()
-        scores = rouge.get_scores(hyps, refs, avg=True)
-        print("Scores of python rouge:")
-        print(scores)
-        print("Now starting ROUGE eval...")
-        results = utils.rouge_eval(self._rouge_ref_dir, self._rouge_dec_dir)
-        utils.rouge_log(results, self._decode_dir)
-        result_dict = utils.rouge_result_to_dict(results)
-        utils.dump_json_file(os.path.join(self._decode_dir, 'ROUGE_results.json'), result_dict)
-        return result_dict
+        return hyps
 
     def beam_search(self, batch):
         device = torch.device(self.params.eval_device)
@@ -196,7 +179,9 @@ class BeamSearch(object):
                 coverage_t = torch.stack(all_coverage, 0)
 
             final_dist, s_t, c_t, attn_dist, coverage_t_plus = self.model.decoder(y_t_1, s_t_1, c_t_1, enc_outputs,
-                        enc_features, enc_padding_mask, extend_vocab_zeros, enc_batch_extended, coverage_t)
+                                                                                  enc_features, enc_padding_mask,
+                                                                                  extend_vocab_zeros,
+                                                                                  enc_batch_extended, coverage_t)
 
             log_probs = torch.log(final_dist)
             # for debug
@@ -220,7 +205,7 @@ class BeamSearch(object):
                 cur_count = 0
                 # we assume that all beam can get no_dup 3-grams in self.cand_beam_size
                 for j in range(self.cand_beam_size):  # for each of the top can_beam_size hyps:
-                    cur_token = topk_ids[i,j].item()
+                    cur_token = topk_ids[i, j].item()
                     new_3gram = None
                     if self.ngram_filter:
                         new_3gram = h.get_new_3gram(cur_token)

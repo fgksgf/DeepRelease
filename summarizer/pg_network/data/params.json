@@ -1,8 +1,8 @@
 {
-    "data_dir": "data",
-    "data_file_suffix": "prs-0605-70.csv",
-    "vocab_path": "data/vocab.json",
-    "model_root": "model/",
+    "data_dir": "summarizer/pg_network/data",
+    "data_file_suffix": "csv",
+    "vocab_path": "summarizer/pg_network/data/vocab.json",
+    "model_root": "summarizer/pg_network/model/",
 
     "hidden_dim": 256,
     "embed_dim": 128,
