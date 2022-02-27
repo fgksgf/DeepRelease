@@ -28,6 +28,7 @@ from . import data
 import random
 
 # TODO: replace tensorflow log with logging
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 tf.get_logger().setLevel('ERROR')
 random.seed(1234)

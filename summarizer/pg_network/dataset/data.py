@@ -28,8 +28,8 @@ UNKNOWN_TOKEN = '[UNK]'  # This has a vocab id, which is used to represent out-o
 START_DECODING = '[START]'  # This has a vocab id, which is used at the start of every decoder input sequence
 STOP_DECODING = '[STOP]'  # This has a vocab id, which is used at the end of untruncated target sequences
 
-
 csv.field_size_limit(sys.maxsize)
+
 
 # Note: none of <s>, </s>, [PAD], [UNK], [START], [STOP] should appear in the vocab file.
 
@@ -69,7 +69,7 @@ class Vocab(object):
                 break
 
         print("Finished constructing vocabulary of %i total words. Last word added: %s" % (
-        self._count, self._id_to_word[self._count - 1]))
+            self._count, self._id_to_word[self._count - 1]))
 
     def word2id(self, word):
         if word not in self._word_to_id:
@@ -150,7 +150,7 @@ def outputids2words(id_list, vocab, article_oovs):
             except ValueError as e:  # i doesn't correspond to an article oov
                 raise ValueError(
                     'Error: model produced word ID %i which corresponds to article OOV %i but this example only has %i article OOVs' % (
-                    i, article_oov_idx, len(article_oovs)))
+                        i, article_oov_idx, len(article_oovs)))
         words.append(w)
     return words
 
@@ -168,43 +168,3 @@ def outputids2decwords(id_list, vocab, article_oovs, pointer_gen):
     except ValueError:
         decoded_words = decoded_words
     return decoded_words
-
-# unused
-def abstract2sents(abstract):
-    cur = 0
-    sents = []
-    while True:
-        try:
-            start_p = abstract.index(SENTENCE_START, cur)
-            end_p = abstract.index(SENTENCE_END, start_p + 1)
-            cur = end_p + len(SENTENCE_END)
-            sents.append(abstract[start_p + len(SENTENCE_START):end_p])
-        except ValueError as e:  # no more sentences
-            return sents
-
-
-def show_art_oovs(article, vocab):
-    unk_token = vocab.word2id(UNKNOWN_TOKEN)
-    words = article.split(' ')
-    words = [("__%s__" % w) if vocab.word2id(w) == unk_token else w for w in words]
-    out_str = ' '.join(words)
-    return out_str
-
-
-def show_abs_oovs(abstract, vocab, article_oovs):
-    unk_token = vocab.word2id(UNKNOWN_TOKEN)
-    words = abstract.split(' ')
-    new_words = []
-    for w in words:
-        if vocab.word2id(w) == unk_token:  # w is oov
-            if article_oovs is None:  # baseline mode
-                new_words.append("__%s__" % w)
-            else:  # pointer-generator mode
-                if w in article_oovs:
-                    new_words.append("__%s__" % w)
-                else:
-                    new_words.append("!!__%s__!!" % w)
-        else:  # w is in-vocab word
-            new_words.append(w)
-    out_str = ' '.join(new_words)
-    return out_str
