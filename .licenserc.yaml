@@ -20,6 +20,8 @@ header:
   paths-ignore:
     - '**/*.md'
     - '**/*.txt'
+    - '**/*.json'
+    - '**/*.csv'
     - 'LICENSE'
     - '.flake8'
     - '.github/**'
