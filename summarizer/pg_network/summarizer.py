@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from loguru import logger
+
+from entity.pull_request import PullRequest
 from summarizer.base import Summarizer
 from summarizer.pg_network import utils
 from summarizer.pg_network.decode import BeamSearch
@@ -20,19 +23,28 @@ from summarizer.pg_network.decode import BeamSearch
 class EntrySummarizer(Summarizer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.logger = logger
 
     def summarize(self, items):
-        pass
+        ret = []
 
-    def preprocess(self, items):
-        pass
+        inputs = []
+        for pr in items:
+            title, desc, cm = self.preprocess(pr)
+            inputs.append((title, desc, cm))
+
+        return self.decode(inputs)
 
     @staticmethod
-    def decode(param_path="summarizer/pg_network/data/params.json", model_path="summarizer/pg_network/model/model",
+    def preprocess(pr: PullRequest):
+        return ' '.join(pr.title), ' '.join(pr.description), ' '.join(pr.commit_messages)
+
+    @staticmethod
+    def decode(inputs, param_path="summarizer/pg_network/data/params.json", model_path="models/pg_network",
                ngram_filter=1, data_file_prefix="test."):
         params = utils.Params(param_path)
         decode_processor = BeamSearch(params, model_path, data_file_prefix=data_file_prefix, ngram_filter=ngram_filter)
-        print(decode_processor.decode())
+        return decode_processor.decode()
 
 
 if __name__ == "__main__":

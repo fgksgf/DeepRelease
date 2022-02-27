@@ -11,16 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from abc import ABC, abstractmethod
-
-from entity.entry import Entry
+from entity.category import Category
 
 
-class Summarizer(ABC):
-    def __init__(self, **kwargs):
-        self.kwargs = kwargs
+def convert_str_to_category(s: str) -> Category:
+    if s.index('fix-bugs') != -1:
+        return Category.BugFixes
+    if s.index('new-features') != -1:
+        return Category.Features
+    if s.index('documentation') != -1:
+        return Category.Documentation
+    if s.index('non-functional') != -1:
+        return Category.NonFunctional
 
-    @abstractmethod
-    def summarize(self, items) -> [Entry]:
-        pass
+    raise ValueError('Unknown category: {}'.format(s))

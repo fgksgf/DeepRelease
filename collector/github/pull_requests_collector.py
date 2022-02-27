@@ -1,4 +1,4 @@
-# Copyright 2021 Hoshea Jiang
+# Copyright 2022 Hoshea Jiang
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,13 +22,16 @@ class PullRequestsCollector(Collector):
         super().__init__(client)
         self.client = client
 
-    def get_all_since_last_release(self, owner, name):
+    def get_all_since_last_release(self, owner, name) -> [PullRequest]:
         """
         Get all pull requests since last release.
 
-        :param owner: the owner of the repository.
-        :param name: the name of the repository.
-        :return:
+        Args:
+            owner: the owner of the repository.
+            name: the name of the repository.
+
+        Returns:
+
         """
         prs = []
         try:
