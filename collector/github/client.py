@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+from abc import ABC, abstractmethod
 from typing import Tuple
 
 import requests
@@ -21,7 +22,21 @@ from config.constants import Constants
 from github import Github
 
 
-class Client:
+class AbstractClient(ABC):
+    @abstractmethod
+    def get_last_release(self, owner: str, name: str) -> Tuple[str, str]:
+        pass
+
+    @abstractmethod
+    def get_pull_requests_since(self, owner: str, name: str, since: str):
+        pass
+
+    @abstractmethod
+    def get_pull_request_info(self, owner, name, num):
+        pass
+
+
+class Client(AbstractClient):
     def __init__(self, token='', api_url=Constants.GITHUB_API_URL):
         self.api_url = api_url
         if token == '':

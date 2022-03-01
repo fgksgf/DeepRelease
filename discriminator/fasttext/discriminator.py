@@ -27,7 +27,7 @@ class CategoryDiscriminator(Discriminator):
         self.model = fasttext.load_model("models/fasttext.bin")
         self.logger = logger
 
-    def classify(self, items: [PullRequest]):
+    def classify(self, items: [PullRequest]) -> [EntryCategory]:
         ret = []
 
         for pr in items:
@@ -43,7 +43,3 @@ class CategoryDiscriminator(Discriminator):
 
     def predict(self, title: str):
         return self.model.predict(title)[0][0][9:]
-
-
-if __name__ == '__main__':
-    print(CategoryDiscriminator().predict("validate host-url for influx config create/set commands"))

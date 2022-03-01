@@ -33,7 +33,7 @@ sha_pattern = r'(^|\s)[\dA-Fa-f-]{7,}(?=(\s|$))'
 digit_pattern = r'(\s|-|\.)[\d]+(?=\s)'
 
 
-def preprocess_title(s: str) -> str:
+def preprocess_title(s: str) -> [str]:
     functions = [remove_non_ascii_and_asterisk, remove_ref_and_mention, replace_words, my_strip]
 
     for f in functions:
@@ -42,7 +42,7 @@ def preprocess_title(s: str) -> str:
     return s
 
 
-def preprocess_desc_and_commits(s: str) -> str:
+def preprocess_desc_and_commits(s: str) -> [str]:
     functions = [remove_non_ascii_and_asterisk, preprocess_text, replace_words, my_strip]
 
     for f in functions:

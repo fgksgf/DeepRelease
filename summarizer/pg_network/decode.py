@@ -76,20 +76,9 @@ class Beam(object):
 
 
 class BeamSearch(object):
-    def __init__(self, params, model_file_path, data_file_prefix="test.", ngram_filter=False):
-        if data_file_prefix != "test." and ngram_filter:
-            print("Warning: Using ngram_filter when validating!")
-        model_name = os.path.basename(model_file_path)
-        dirname = os.path.dirname(model_file_path)
-        self._decode_dir = os.path.join(dirname, data_file_prefix + 'decode_%s' % (model_name))
-        self._rouge_ref_dir = get_rouge_ref_dir(self._decode_dir)
-        self._rouge_dec_dir = get_rouge_dec_dir(self._decode_dir)
-        for p in [self._decode_dir, self._rouge_ref_dir, self._rouge_dec_dir]:
-            if not os.path.exists(p):
-                os.mkdir(p)
-
+    def __init__(self, params, model_file_path, data_file, ngram_filter=False):
         self.vocab = Vocab(params.vocab_path, params.vocab_size)
-        decode_data_path = os.path.join(params.data_dir, data_file_prefix + params.data_file_suffix)
+        decode_data_path = os.path.join(params.data_dir, data_file)
         self.batcher = Batcher(params, decode_data_path, self.vocab, mode='decode',
                                batch_size=params.beam_size, single_pass=True)
         self.pad_id = self.vocab.word2id(data.PAD_TOKEN)

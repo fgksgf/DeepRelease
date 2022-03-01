@@ -30,9 +30,9 @@ class TestMarkdownGenerator(unittest.TestCase):
         Entry(15, "Add feature B"),
     ]
     entry_categories = [
-        EntryCategory(11, Category.BugFixes),
-        EntryCategory(12, Category.BugFixes),
-        EntryCategory(13, Category.BugFixes),
+        EntryCategory(11, Category.BugFix),
+        EntryCategory(12, Category.BugFix),
+        EntryCategory(13, Category.BugFix),
         EntryCategory(14, Category.Features),
         EntryCategory(15, Category.Features),
     ]
@@ -46,7 +46,7 @@ class TestMarkdownGenerator(unittest.TestCase):
         for i in range(3, 5):
             self.assertIn(self.entries[i], groups[0].entries)
 
-        self.assertEqual(groups[1].category, Category.BugFixes)
+        self.assertEqual(groups[1].category, Category.BugFix)
         self.assertEqual(3, len(groups[1].entries))
         for i in range(3):
             self.assertIn(self.entries[i], groups[1].entries)
@@ -54,5 +54,5 @@ class TestMarkdownGenerator(unittest.TestCase):
     def test_generate_content(self):
         groups = self.generator.merge(self.entries, self.entry_categories)
         content = self.generator.generate_content(groups)
-        expected_content = """\n## Features\n\n- Add feature A\n- Add feature B\n\n## BugFixes\n\n- Fix bug A\n- Fix bug B\n- Fix bug C\n"""
+        expected_content = """\n## Features\n\n- Add feature A\n- Add feature B\n\n## BugFix\n\n- Fix bug A\n- Fix bug B\n- Fix bug C\n"""
         self.assertEqual(expected_content, content)

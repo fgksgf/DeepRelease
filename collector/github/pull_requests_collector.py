@@ -13,12 +13,13 @@
 # limitations under the License.
 
 from collector.base import Collector
+from collector.github.client import AbstractClient
 from entity.pull_request import PullRequest
 from collector.github.utils.url_utils import check_pull_request_url
 
 
 class PullRequestsCollector(Collector):
-    def __init__(self, client):
+    def __init__(self, client: AbstractClient):
         super().__init__(client)
         self.client = client
 

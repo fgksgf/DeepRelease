@@ -18,7 +18,7 @@ class Category(Enum):
     Features = 0
     F = 0
 
-    BugFixes = 1
+    BugFix = 1
     B = 1
 
     Documentation = 2

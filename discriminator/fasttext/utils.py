@@ -11,17 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from entity.category import Category
 
 
 def convert_str_to_category(s: str) -> Category:
-    if s.index('fix-bugs') != -1:
-        return Category.BugFixes
-    if s.index('new-features') != -1:
+    if s.find('fix-bugs') != -1:
+        return Category.BugFix
+    if s.find('new-features') != -1:
         return Category.Features
-    if s.index('documentation') != -1:
+    if s.find('documentation') != -1:
         return Category.Documentation
-    if s.index('non-functional') != -1:
+    if s.find('non-functional') != -1:
         return Category.NonFunctional
 
     raise ValueError('Unknown category: {}'.format(s))

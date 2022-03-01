@@ -19,7 +19,7 @@ class TestPullRequest(unittest.TestCase):
                 'nodes': [
                     {
                         'commit': {
-                            'messages': ' test 测试\n @test test@test.com ### ',
+                            'message': '',
                         },
                     }
                 ]
@@ -28,4 +28,4 @@ class TestPullRequest(unittest.TestCase):
         self.pr.set_data(data)
         self.assertEqual(['test'], self.pr.title)
         self.assertEqual(['test', '.'], self.pr.description)
-        self.assertEqual(['test', '.'], self.pr.commit_messages)
+        self.assertEqual([], self.pr.commit_messages)

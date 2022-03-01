@@ -40,7 +40,7 @@ class PullRequest:
         commits = data.get('commits').get('nodes')
         temp = []
         for cm in commits:
-            temp.append(cm.get('commit').get('messages'))
+            temp.append(cm.get('commit').get('message'))
         self.commit_messages = preprocess_desc_and_commits(' '.join(temp))
 
     @property

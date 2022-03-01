@@ -14,10 +14,11 @@
 
 from typing import Tuple
 
+from collector.github.client import AbstractClient
 from collector.github.pull_requests_collector import PullRequestsCollector
 
 
-class MockClient:
+class MockClient(AbstractClient):
     def get_last_release(self, owner: str, name: str) -> Tuple[str, str]:  # noqa
         return '', ''
 
@@ -33,5 +34,4 @@ def test_get_all_since_last_release():  # noqa
     prc = PullRequestsCollector(client)
     prs = prc.get_all_since_last_release('test', 'test')
     assert len(prs) == 2
-    assert prs[0].id == 175 and prs[1].id == 161
     assert prs[0].owner == 'apache' and prs[0].name == 'skywalking-python'
