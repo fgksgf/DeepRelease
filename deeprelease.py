@@ -31,8 +31,6 @@ class DeepRelease:
     """DeepRelease CLI."""
 
     def __init__(self):
-        """Initialize DeepRelease's components.
-        """
         logger.add(sink=sys.stdout, format="{time} {level} {message}", level='INFO')
         self.initialize = False
         self.collector = None
@@ -41,6 +39,8 @@ class DeepRelease:
         self.generator = None
 
     def initialize_components(self):
+        """Initialize DeepRelease's components."""
+
         beg = time.time()
 
         if self.initialize is not True:
@@ -69,6 +69,7 @@ class DeepRelease:
             owner: the owner of the repo.
             repo: the name of the repo.
             debug: whether to enable debug mode.
+
         Returns:
             None.
         """

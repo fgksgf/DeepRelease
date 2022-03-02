@@ -12,5 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-def all_same(items):
+from typing import Any
+
+
+def all_same(items: [Any]) -> bool:
+    """
+    Return True if all items are the same.
+
+    Args:
+        items: a list of items.
+
+    Returns:
+        True if all items are the same.
+    """
     return all(x == items[0] for x in items)

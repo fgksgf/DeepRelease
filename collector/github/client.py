@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import base64
 import os
 from abc import ABC, abstractmethod
 from typing import Tuple
 
 import requests
+from loguru import logger
 
 from config.constants import Constants
 from github import Github
@@ -34,6 +36,7 @@ class AbstractClient(ABC):
     @abstractmethod
     def get_pull_request_info(self, owner, name, num):
         pass
+
 
 
 class Client(AbstractClient):
@@ -166,3 +169,32 @@ class Client(AbstractClient):
             "since": since
         }
         return self.query_with_variables(query, variables)
+
+    def get_template_content(self, owner: str, name: str) -> str:
+        """
+        Get the pull request template content from the repository, if any.
+
+        :param owner:
+        :param name:
+        :return:
+        """
+        filenames = [
+            'PULL_REQUEST_TEMPLATE.md',
+            'pull_request_template.md',
+            'PULL_REQUEST_TEMPLATE',
+        ]
+
+        repo = self.client.get_repo(f'{owner}/{name}')
+        branch = repo.get_branch(repo.default_branch)
+        for filename in filenames:
+            try:
+                content_encoded = repo.get_contents(f'.github/{filename}', ref=branch.commit.sha).content
+                content = base64.b64decode(content_encoded).decode('utf-8')
+            except Exception as e:
+                logger.debug(f'Failed to get content from `.github/{filename}`: {e}')
+                continue
+            else:
+                return content
+
+        return ''
+
