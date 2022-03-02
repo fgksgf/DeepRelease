@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 import re
 
 PR_URL_PATTERN = re.compile(r'https://github\.com/[0-9a-z\-]+/[0-9a-z\-]+/pull/\d+')

@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 import pytest
 
-from collector.github.utils.url_utils import check_pull_request_url, parse_pull_request_url
+from utils.url import check_pull_request_url, parse_pull_request_url
 
 
 @pytest.mark.parametrize("url, expected", [('https://github.com/apache/skywalking-python/pull/175', True),

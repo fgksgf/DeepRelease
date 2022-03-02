@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collector.github.utils.url_utils import parse_pull_request_url
+from utils.url_utils import parse_pull_request_url
 from utils.preprocess import preprocess_desc_and_commits, preprocess_title
 
 
