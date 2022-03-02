@@ -56,7 +56,7 @@ class Client(AbstractClient):
                                  json={'query': query},
                                  headers=self.headers)
         if response.status_code == 200:
-            return response.text
+            return response.json()
         else:
             raise Exception("Query failed to run by returning code of {}. {}".format(response.status_code, query))
 
@@ -72,7 +72,7 @@ class Client(AbstractClient):
                                  json={'query': query, 'variables': variables},
                                  headers=self.headers)
         if response.status_code == 200:
-            return response.text
+            return response.json()
         else:
             raise Exception("Query failed to run by returning code of {}. {}".format(response.status_code, query))
 

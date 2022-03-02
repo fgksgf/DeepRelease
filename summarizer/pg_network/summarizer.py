@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import csv
+import os
 import time
+from os.path import isdir
 from typing import List
 
 from loguru import logger
@@ -24,24 +26,30 @@ from summarizer.base import Summarizer
 from summarizer.pg_network import utils
 from summarizer.pg_network.decode import BeamSearch
 
+TMP_DIR = '/tmp/deeprelease'
+
 
 class EntrySummarizer(Summarizer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.logger = logger
+        if isdir(TMP_DIR) is False:
+            os.mkdir(TMP_DIR)
 
     def summarize(self, items: [PullRequest]) -> [Entry]:
-        data_file_name = f'input_{time.time()}.csv'
-        self.logger.debug(f'Saving input to {data_file_name}')
+        data_file_name = f'{TMP_DIR}/input_{time.time()}.csv'
+        logger.debug(f'Saving input to {data_file_name}')
 
         rows = self.save_input_to_csv(items, data_file_name)
         abstracts = self.decode(data_file_name)
+        logger.debug(f'Model output: {abstracts}')
+
         if len(items) != len(abstracts):
-            self.logger.exception(f'The number of input ({len(items)}) and the number of output ({len(abstracts)}) do not match')
+            logger.exception(
+                f'The number of input ({len(items)}) and the number of output ({len(abstracts)}) do not match')
 
         entries = []
         for i in range(len(abstracts)):
-            entries.append(Entry(rows[i], abstracts[i]))
+            entries.append(Entry(rows[i][0], abstracts[i]))
         return entries
 
     def save_input_to_csv(self, items: [PullRequest], filename: str) -> List[List[str]]:
@@ -69,7 +77,3 @@ class EntrySummarizer(Summarizer):
         params = utils.Params(param_path)
         decode_processor = BeamSearch(params, model_path, data_file=data_file, ngram_filter=ngram_filter)
         return decode_processor.decode()
-
-
-if __name__ == "__main__":
-    print(EntrySummarizer.decode('test.csv'))

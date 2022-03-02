@@ -20,13 +20,11 @@ class PullRequest:
     def __init__(self, url, commit):
         self.url = url
         self.commit = commit
-        self.owner, self.name, self.pr_num = parse_pull_request_url(url)
+        self.owner, self.name, self.number = parse_pull_request_url(url)
 
         self.title = []
         self.description = []
         self.commit_messages = []
-
-        self.__id = hash(self.url)
 
     def set_data(self, data: dict):
         """
@@ -45,4 +43,12 @@ class PullRequest:
 
     @property
     def id(self):
-        return self.__id
+        return self.number
+
+    def __str__(self):
+        return str({
+            'url': self.url,
+            'title': self.title,
+            'description': self.description,
+            'commit_messages': self.commit_messages,
+        })

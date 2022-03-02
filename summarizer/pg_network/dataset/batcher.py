@@ -307,4 +307,4 @@ class Batcher(object):
                 # tf.compat.v1.logging.warning('Found an example with empty article text. Skipping it.')
                 continue
             else:
-                yield (example_id, article_text, abstract_text)
+                yield example_id, article_text, abstract_text

@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from loguru import logger
+
 from collector.base import Collector
-from collector.github.client import AbstractClient
+from collector.github.client import AbstractClient, Client
 from entity.pull_request import PullRequest
 from collector.github.utils.url_utils import check_pull_request_url
 
@@ -23,6 +25,7 @@ class PullRequestsCollector(Collector):
         super().__init__(client)
         self.client = client
 
+    @logger.catch
     def get_all_since_last_release(self, owner, name) -> [PullRequest]:
         """
         Get all pull requests since last release.
@@ -34,25 +37,34 @@ class PullRequestsCollector(Collector):
         Returns:
 
         """
-        prs = []
-        try:
-            commit, date = self.client.get_last_release(owner, name)
-            data = self.client.get_pull_requests_since(owner, name, date)
-            if data.get('errors') is not None:
-                raise Exception(data.get('errors')[0].get('message'))
-            else:
-                nodes = data.get('data').get('repository').get('defaultBranchRef').get('target').get('history').get('nodes')  # noqa: E501
-                for node in nodes:
-                    url = node.get('associatedPullRequests').get('nodes')[0].get('url')
-                    commit = node.get('oid')
-                    if check_pull_request_url(url):
-                        pr = PullRequest(url, commit)
-                        pr_data = self.client.get_pull_request_info(owner, name, pr.id)
-                        if pr_data.get('errors') is not None:
-                            raise Exception(pr_data.get('errors')[0].get('message'))
-                        pr.set_data(pr_data.get('data').get('repository').get('pullRequest'))
-                        prs.append(pr)
-        except Exception as e:
-            print(e)
+        commit, date = self.client.get_last_release(owner, name)
+        logger.debug(f"Last release commit is {commit}, at {date}")
 
+        data = self.client.get_pull_requests_since(owner, name, date)
+        if data.get('errors') is not None:
+            err_msg = data.get('errors')[0].get('message')
+            logger.error(f'failed to get pull requests since {date}: {err_msg}')
+            return []
+
+        nodes = data.get('data').get('repository').get('defaultBranchRef').get('target').get('history').get(
+            'nodes')[:-1]  # noqa: E501
+        if len(nodes) == 0:
+            logger.error(f"No pull requests since {date}")
+            return []
+        logger.debug(f'Collect {len(nodes)} pull requests since last release at {date}')
+
+        prs = []
+        for node in nodes:
+            try:
+                url = node.get('associatedPullRequests').get('nodes')[0].get('url')
+                commit = node.get('oid')
+                if check_pull_request_url(url):
+                    pr = PullRequest(url, commit)
+                    pr_data = self.client.get_pull_request_info(owner, name, pr.number)
+                    if pr_data.get('errors') is not None:
+                        raise Exception(pr_data.get('errors')[0].get('message'))
+                    pr.set_data(pr_data.get('data').get('repository').get('pullRequest'))
+                    prs.append(pr)
+            except Exception as e:
+                logger.warning(f'failed to process pull request: {e}')
         return prs

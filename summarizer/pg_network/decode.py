@@ -16,6 +16,7 @@ import os
 import time
 import copy
 import torch
+from loguru import logger
 
 from . import utils
 from .pointer_model import PointerEncoderDecoder
@@ -24,14 +25,6 @@ from .dataset import data
 from .dataset.data import Vocab
 from .dataset.batcher import Batcher
 from .dataset.train_util import get_input_from_batch
-
-
-def get_rouge_ref_dir(decode_dir):
-    return os.path.join(decode_dir, 'rouge_ref')
-
-
-def get_rouge_dec_dir(decode_dir):
-    return os.path.join(decode_dir, 'rouge_dec_dir')
 
 
 class Beam(object):
@@ -175,7 +168,7 @@ class BeamSearch(object):
             log_probs = torch.log(final_dist)
             # for debug
             if torch.isnan(log_probs).any():
-                print("Error: log probs contains NAN!")
+                logger.error('log probs contains NAN')
 
             topk_log_probs, topk_ids = torch.topk(log_probs, self.cand_beam_size)
 
@@ -213,7 +206,7 @@ class BeamSearch(object):
                         break
 
             if len(all_beams) < 4:
-                print("Error: Only find {} candidate beams.".format(all_beams))
+                logger.error(f'Only find {all_beams} candidate beams')
 
             beams = []
             for h in self.sort_beams(all_beams):

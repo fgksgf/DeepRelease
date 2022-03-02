@@ -14,6 +14,8 @@
 
 """The entrance of DeepRelease."""
 import os
+import sys
+import time
 
 import fire
 from loguru import logger
@@ -31,33 +33,72 @@ class DeepRelease:
     def __init__(self):
         """Initialize DeepRelease's components.
         """
-        self.client = Client(os.getenv('GITHUB_TOKEN'))
-        self.collector = PullRequestsCollector(self.client)
-        self.summarizer = EntrySummarizer()
-        self.discriminator = CategoryDiscriminator()
-        self.generator = MarkdownGenerator()
+        logger.add(sink=sys.stdout, format="{time} {level} {message}", level='INFO')
+        self.initialize = False
+        self.collector = None
+        self.summarizer = None
+        self.discriminator = None
+        self.generator = None
+
+    def initialize_components(self):
+        beg = time.time()
+
+        if self.initialize is not True:
+            token = os.getenv('GITHUB_TOKEN')
+            if token is None:
+                logger.error('The env variable GITHUB_TOKEN is not set!')
+                return
+
+            client = Client(token)
+
+            self.collector = PullRequestsCollector(client)
+            self.summarizer = EntrySummarizer()
+            self.discriminator = CategoryDiscriminator()
+            self.generator = MarkdownGenerator()
+            self.initialize = True
+
+        logger.debug(f'Initialize components took {time.time() - beg} seconds.')
 
     @logger.catch
-    def run(self, owner='', repo=''):
+    def run(self, owner='', repo='', save_dir='.', save_name='release.md', debug=False, **kwargs):
         """Run DeepRelease.
 
         Args:
+            save_name: the name of the generated file.
+            save_dir: where to save the generated file.
             owner: the owner of the repo.
             repo: the name of the repo.
-
+            debug: whether to enable debug mode.
         Returns:
             None.
         """
+        if debug:
+            logger.remove()
+            logger.add(sink=sys.stdout, level='DEBUG')
+
+        self.initialize_components()
+
+        collect_beg = time.time()
         prs = self.collector.get_all_since_last_release(owner, repo)
-        logger.info('{} pull requests are collected.'.format(len(prs)))
+        if len(prs) == 0:
+            logger.error('No PRs to process!')
+            return
+        logger.info(f'{len(prs)} pull request(s) are collected in {time.time() - collect_beg} seconds.')
 
+        summarize_beg = time.time()
         entries = self.summarizer.summarize(prs)
-        logger.info('{} entries are summarized.'.format(len(entries)))
+        logger.info(f'{len(entries)} pull request(s) are summarized in {time.time() - summarize_beg} seconds.')
 
+        discriminate_beg = time.time()
         categories = self.discriminator.classify(prs)
-        logger.info('{} entries are classified.'.format(len(categories)))
+        logger.info(f'{len(categories)} pull request(s) are classified in {time.time() - discriminate_beg} seconds.')
 
-        self.generator.generate(entries, categories)
+        if len(categories) != len(entries):
+            logger.error('The number of change entries and change categories are not equal!')
+            return
+
+        self.generator.generate(entries, categories, save_dir=save_dir, save_name=save_name)
+        logger.info(f'Done: generate the release notes: {save_dir}/{save_name}')
 
 
 if __name__ == '__main__':

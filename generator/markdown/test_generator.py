@@ -54,5 +54,5 @@ class TestMarkdownGenerator(unittest.TestCase):
     def test_generate_content(self):
         groups = self.generator.merge(self.entries, self.entry_categories)
         content = self.generator.generate_content(groups)
-        expected_content = """\n## Features\n\n- Add feature A\n- Add feature B\n\n## BugFix\n\n- Fix bug A\n- Fix bug B\n- Fix bug C\n"""
+        expected_content = """\n## Features\n\n- Add feature A (#14)\n- Add feature B (#15)\n\n## BugFix\n\n- Fix bug A (#11)\n- Fix bug B (#12)\n- Fix bug C (#13)\n"""
         self.assertEqual(expected_content, content)

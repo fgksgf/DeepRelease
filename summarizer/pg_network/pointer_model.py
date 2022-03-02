@@ -226,7 +226,6 @@ class PointerEncoderDecoder:
             device = hps.eval_device
         else:
             device = hps.device
-        print(device)
         encoder = Encoder(hps, pad_id)
         decoder = AttentionDecoder(hps, pad_id)
 

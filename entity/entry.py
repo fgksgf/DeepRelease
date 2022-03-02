@@ -19,3 +19,6 @@ class Entry:
 
     def __str__(self):
         return self.body
+
+    def __eq__(self, other):
+        return self.id == other.id and self.body == other.body

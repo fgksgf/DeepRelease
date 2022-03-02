@@ -33,5 +33,5 @@ def test_get_all_since_last_release():  # noqa
     client = MockClient()
     prc = PullRequestsCollector(client)
     prs = prc.get_all_since_last_release('test', 'test')
-    assert len(prs) == 2
+    assert len(prs) == 1
     assert prs[0].owner == 'apache' and prs[0].name == 'skywalking-python'

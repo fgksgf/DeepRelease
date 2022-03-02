@@ -11,6 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from loguru import logger
+
 from entity.category import Category, EntryCategory
 from entity.entry import Entry
 from entity.group import Group
@@ -43,7 +46,7 @@ class MarkdownGenerator(Generator):
         for g in groups:
             lines.append(f'\n## {g.category.name}\n')
             for e in g.entries:
-                lines.append(f'- {e.body}')
+                lines.append(f"- {e.body.rstrip('.')} (#{e.id})")
         return '\n'.join(lines) + '\n'
 
     @staticmethod
@@ -54,4 +57,5 @@ class MarkdownGenerator(Generator):
     def generate(self, entries: [Entry], categories: [Category], **kwargs):
         groups = self.merge(entries, categories, **kwargs)
         content = self.generate_content(groups, **kwargs)
+        logger.debug(f'Generated markdown content:\n{content}')
         self.save(content, kwargs.get('save_dir'), kwargs.get('save_name'))

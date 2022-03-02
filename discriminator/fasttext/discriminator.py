@@ -25,7 +25,6 @@ class CategoryDiscriminator(Discriminator):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.model = fasttext.load_model("models/fasttext.bin")
-        self.logger = logger
 
     def classify(self, items: [PullRequest]) -> [EntryCategory]:
         ret = []
@@ -36,7 +35,7 @@ class CategoryDiscriminator(Discriminator):
                 c = convert_str_to_category(self.predict(title))
                 ret.append(EntryCategory(pr.id, c))
             except Exception as e:
-                self.logger.warning('Error when classifying {}: {}'.format(title, e))
+                logger.warning('Error when classifying {}: {}'.format(title, e))
                 continue
 
         return ret
