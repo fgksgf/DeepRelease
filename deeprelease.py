@@ -21,7 +21,7 @@ import fire
 from loguru import logger
 
 from collector.github.client import Client
-from collector.github.pull_requests_collector import PullRequestsCollector
+from collector.github.collector import PullRequestsCollector
 from discriminator.fasttext.discriminator import CategoryDiscriminator
 from generator.markdown.generator import MarkdownGenerator
 from summarizer.pg_network.summarizer import EntrySummarizer

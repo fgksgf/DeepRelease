@@ -16,7 +16,7 @@ import unittest
 
 from entity.pull_request import PullRequest
 from summarizer.pg_network.summarizer import EntrySummarizer
-from utils.utils import all_same
+from utils.misc import all_same
 
 data = {
     'title': 'test',

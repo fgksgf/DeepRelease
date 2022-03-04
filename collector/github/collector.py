@@ -17,7 +17,7 @@ from loguru import logger
 from collector.base import Collector
 from collector.github.client import AbstractClient
 from entity.pull_request import PullRequest
-from utils.url_utils import check_pull_request_url
+from utils.url import check_pull_request_url
 
 
 class PullRequestsCollector(Collector):

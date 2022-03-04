@@ -15,7 +15,7 @@
 from typing import Tuple
 
 from collector.github.client import AbstractClient
-from collector.github.pull_requests_collector import PullRequestsCollector
+from collector.github.collector import PullRequestsCollector
 
 
 class MockClient(AbstractClient):
