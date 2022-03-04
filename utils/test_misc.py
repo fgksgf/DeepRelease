@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from abc import ABC, abstractmethod
+import pytest
 
-from entity.entry import Entry
+from utils.misc import all_same
 
 
-class Summarizer(ABC):
-    def __init__(self, **kwargs):
-        self.kwargs = kwargs
-
-    @abstractmethod
-    def summarize(self, items) -> [Entry]:
-        pass
+@pytest.mark.parametrize("test_input,expected", [
+    ([1, 1, 1], True),
+    (['1', '1', '1'], True),
+    ([1, 2, 3], False),
+    (['1', '2', '3'], False),
+])
+def test_all_same(test_input, expected):
+    assert all_same(test_input) == expected

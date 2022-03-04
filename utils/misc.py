@@ -12,15 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from abc import ABC, abstractmethod
-
-from entity.entry import Entry
+from typing import Any
 
 
-class Summarizer(ABC):
-    def __init__(self, **kwargs):
-        self.kwargs = kwargs
+def all_same(items: [Any]) -> bool:
+    """
+    Return True if all items are the same.
 
-    @abstractmethod
-    def summarize(self, items) -> [Entry]:
-        pass
+    Args:
+        items: a list of items.
+
+    Returns:
+        True if all items are the same.
+    """
+    return all(x == items[0] for x in items)

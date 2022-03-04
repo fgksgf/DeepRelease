@@ -46,7 +46,7 @@ class Encoder(nn.Module):
     def forward(self, enc_inps, enc_seq_lens):
         """
         :param enc_inps: batch_size x max_seq_len
-        :param seq_lens: batch_size
+        :param enc_seq_lens: batch_size
         :return:
             enc_outputs: batch_size x max_seq_len x 2*hidden_dim
             enc_features: batch_size x max_seq_len x 2*hidden_dim
@@ -226,7 +226,6 @@ class PointerEncoderDecoder:
             device = hps.eval_device
         else:
             device = hps.device
-        print(device)
         encoder = Encoder(hps, pad_id)
         decoder = AttentionDecoder(hps, pad_id)
 

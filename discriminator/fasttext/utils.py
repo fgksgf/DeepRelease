@@ -12,15 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from abc import ABC, abstractmethod
-
-from entity.entry import Entry
+from entity.category import Category
 
 
-class Summarizer(ABC):
-    def __init__(self, **kwargs):
-        self.kwargs = kwargs
+def convert_str_to_category(s: str) -> Category:
+    if s.find('fix-bugs') != -1:
+        return Category.BugFix
+    if s.find('new-features') != -1:
+        return Category.Features
+    if s.find('documentation') != -1:
+        return Category.Documentation
+    if s.find('non-functional') != -1:
+        return Category.NonFunctional
 
-    @abstractmethod
-    def summarize(self, items) -> [Entry]:
-        pass
+    raise ValueError('Unknown category: {}'.format(s))

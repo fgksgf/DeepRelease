@@ -1,4 +1,4 @@
-# Copyright 2021 Hoshea Jiang
+# Copyright 2022 Hoshea Jiang
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,17 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collector.github.utils.url_utils import parse_pull_request_url
+from utils.preprocess import preprocess_desc_and_commits, preprocess_title
+from utils.url import parse_pull_request_url
 
 
 class PullRequest:
     def __init__(self, url, commit):
         self.url = url
         self.commit = commit
-        self.owner, self.name, self.id = parse_pull_request_url(url)
+        self.owner, self.name, self.number = parse_pull_request_url(url)
 
-        self.title = ''
-        self.description = ''
+        self.title = []
+        self.description = []
         self.commit_messages = []
 
     def set_data(self, data: dict):
@@ -32,8 +33,22 @@ class PullRequest:
         :param data:
         :return:
         """
-        self.title = data.get('title')
-        self.description = data.get('bodyText')
+        self.title = preprocess_title(data.get('title'))
+        self.description = preprocess_desc_and_commits(data.get('bodyText'))
         commits = data.get('commits').get('nodes')
+        temp = []
         for cm in commits:
-            self.commit_messages.append(cm.get('commit').get('messages'))
+            temp.append(cm.get('commit').get('message'))
+        self.commit_messages = preprocess_desc_and_commits(' '.join(temp))
+
+    @property
+    def id(self):
+        return self.number
+
+    def __str__(self):
+        return str({
+            'url': self.url,
+            'title': self.title,
+            'description': self.description,
+            'commit_messages': self.commit_messages,
+        })

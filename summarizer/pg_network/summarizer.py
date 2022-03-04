@@ -12,28 +12,68 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import csv
+import os
+import time
+from os.path import isdir
+from typing import List
+
+from loguru import logger
+
+from entity.entry import Entry
+from entity.pull_request import PullRequest
 from summarizer.base import Summarizer
 from summarizer.pg_network import utils
 from summarizer.pg_network.decode import BeamSearch
+
+TMP_DIR = '/tmp/deeprelease'
 
 
 class EntrySummarizer(Summarizer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        if isdir(TMP_DIR) is False:
+            os.mkdir(TMP_DIR)
 
-    def summarize(self, items):
-        pass
+    def summarize(self, items: [PullRequest]) -> [Entry]:
+        data_file_name = f'{TMP_DIR}/input_{time.time()}.csv'
+        logger.debug(f'Saving input to {data_file_name}')
 
-    def preprocess(self, items):
-        pass
+        rows = self.save_input_to_csv(items, data_file_name)
+        abstracts = self.decode(data_file_name)
+        logger.debug(f'Model output: {abstracts}')
+
+        if len(items) != len(abstracts):
+            logger.exception(
+                f'The number of input ({len(items)}) and the number of output ({len(abstracts)}) do not match')
+
+        entries = []
+        for i in range(len(abstracts)):
+            entries.append(Entry(rows[i][0], abstracts[i]))
+        return entries
+
+    def save_input_to_csv(self, items: [PullRequest], filename: str) -> List[List[str]]:
+        rows = []
+
+        for pr in items:
+            article = self.preprocess(pr)
+            rows.append([pr.id, '', article])
+
+        with open(filename, 'w') as f:
+            writer = csv.writer(f)
+            writer.writerow(['id', 'abstract', 'article'])
+            writer.writerows(rows)
+
+        return rows
 
     @staticmethod
-    def decode(param_path="summarizer/pg_network/data/params.json", model_path="summarizer/pg_network/model/model",
-               ngram_filter=1, data_file_prefix="test."):
+    def preprocess(pr: PullRequest) -> str:
+        lst = [' '.join(pr.title), ' '.join(pr.description), ' '.join(pr.commit_messages)]
+        return ' [sep] '.join(lst)
+
+    @staticmethod
+    def decode(data_file, param_path="summarizer/pg_network/data/params.json", model_path="models/pg_network",
+               ngram_filter=1):
         params = utils.Params(param_path)
-        decode_processor = BeamSearch(params, model_path, data_file_prefix=data_file_prefix, ngram_filter=ngram_filter)
-        print(decode_processor.decode())
-
-
-if __name__ == "__main__":
-    EntrySummarizer.decode()
+        decode_processor = BeamSearch(params, model_path, data_file=data_file, ngram_filter=ngram_filter)
+        return decode_processor.decode()

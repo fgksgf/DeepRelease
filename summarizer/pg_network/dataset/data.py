@@ -20,6 +20,8 @@ import json
 from collections import Counter
 
 # <s> and </s> are used in the data files to segment the abstracts into sentences. They don't receive vocab ids.
+from loguru import logger
+
 SENTENCE_START = '<s>'
 SENTENCE_END = '</s>'
 
@@ -63,12 +65,12 @@ class Vocab(object):
             self._word_to_id[w] = self._count
             self._id_to_word[self._count] = w
             self._count += 1
-            if max_size > 0 and self._count >= max_size:
-                print("max_size of vocab was specified as %i; we now have %i words. Stopping reading." % (
+            if 0 < max_size <= self._count:
+                logger.debug("max_size of vocab was specified as %i; we now have %i words. Stopping reading." % (
                     max_size, self._count))
                 break
 
-        print("Finished constructing vocabulary of %i total words. Last word added: %s" % (
+        logger.debug("Finished constructing vocabulary of %i total words. Last word added: %s" % (
             self._count, self._id_to_word[self._count - 1]))
 
     def word2id(self, word):
@@ -85,7 +87,7 @@ class Vocab(object):
         return self._count
 
     def write_metadata(self, fpath):
-        print("Writing word embedding metadata file to %s..." % (fpath))
+        logger.debug("Writing word embedding metadata file to %s..." % (fpath))
         with open(fpath, "w") as f:
             fieldnames = ['word']
             writer = csv.DictWriter(f, delimiter="\t", fieldnames=fieldnames)
@@ -101,7 +103,7 @@ def example_generator(data_path, single_pass):
                 # id, abstract, article
                 yield row
         if single_pass:
-            print("example_generator completed reading all datafiles. No more data.")
+            # print("example_generator completed reading all datafiles. No more data.")
             break
 
 

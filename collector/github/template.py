@@ -12,15 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from abc import ABC, abstractmethod
-
-from entity.entry import Entry
+import re
 
 
-class Summarizer(ABC):
-    def __init__(self, **kwargs):
-        self.kwargs = kwargs
+def re_strip(string, char=r"\W"):
+    result = re.sub(f"^{char}+", "", string)
+    result = re.sub(f"{char}+$", "", result)
+    return result
 
-    @abstractmethod
-    def summarize(self, items) -> [Entry]:
-        pass
+
+def remove_str(s: str, t: str) -> str:
+    s = str(s)
+    if len(s) == 0:
+        return s
+    for i in t.split('\n'):
+        tmp = re_strip(i).strip()
+        if len(tmp) > 0:
+            s = s.replace(tmp, '')
+    return s

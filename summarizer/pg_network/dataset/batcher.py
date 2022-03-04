@@ -14,23 +14,17 @@
 
 # Most of this file is copied form https://github.com/abisee/pointer-generator/blob/master/batcher.py
 
-import os
+import random
 import queue
 import time
 from random import shuffle
 from threading import Thread
 
 import numpy as np
-import tensorflow as tf
+from loguru import logger
 
-from . import data
+from summarizer.pg_network.dataset import data
 
-import random
-
-# TODO: replace tensorflow log with logging
-
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-tf.get_logger().setLevel('ERROR')
 random.seed(1234)
 np.random.seed(318)
 
@@ -64,10 +58,10 @@ class Example(object):
             # Store a version of the enc_input where in-article OOVs are represented by their temporary OOV id; also store the in-article OOVs words themselves
             self.enc_input_extend_vocab, self.article_oovs = data.article2ids(article_words, vocab)
 
-            # Get a verison of the reference summary where in-article OOVs are represented by their temporary article OOV id
+            # Get a version of the reference summary where in-article OOVs are represented by their temporary article OOV id
             abs_ids_extend_vocab = data.abstract2ids(abstract_words, vocab, self.article_oovs)
 
-            # Overwrite decoder target sequence so it uses the temp article OOV ids
+            # Overwrite decoder target sequence, so it uses the temp article OOV ids
             _, self.target = self.get_dec_inp_targ_seqs(abs_ids_extend_vocab, params.max_dec_steps, start_decoding,
                                                         stop_decoding)
 
@@ -211,11 +205,11 @@ class Batcher(object):
     def next_batch(self):
         # If the batch queue is empty, print a warning
         if self._batch_queue.qsize() == 0:
-            tf.compat.v1.logging.warning(
+            logger.debug(
                 'Bucket input queue is empty when calling next_batch. Bucket queue size: %i, Input queue size: %i',
                 self._batch_queue.qsize(), self._example_queue.qsize())
             if self._single_pass and self._finished_reading:
-                tf.compat.v1.logging.info("Finished reading dataset in single_pass mode.")
+                logger.debug("Finished reading dataset in single_pass mode.")
                 return None
 
         batch = self._batch_queue.get()  # get the next Batch
@@ -229,10 +223,10 @@ class Batcher(object):
                 (ex_id, article, abstract) = next(
                     input_gen)  # read the next example from file. article and abstract are both strings.
             except StopIteration:  # if there are no more examples:
-                tf.compat.v1.logging.info(
+                logger.debug(
                     "The example generator for this example queue filling thread has exhausted data.")
                 if self._single_pass:
-                    tf.compat.v1.logging.info(
+                    logger.debug(
                         "single_pass mode is on, so we've finished reading dataset. This thread is stopping.")
                     self._finished_reading = True
                     break
@@ -273,21 +267,21 @@ class Batcher(object):
 
     def watch_threads(self):
         while True:
-            tf.compat.v1.logging.info(
+            logger.debug(
                 'Bucket queue size: %i, Input queue size: %i',
                 self._batch_queue.qsize(), self._example_queue.qsize())
 
             time.sleep(60)
             for idx, t in enumerate(self._example_q_threads):
                 if not t.is_alive():  # if the thread is dead
-                    tf.compat.v1.logging.error('Found example queue thread dead. Restarting.')
+                    logger.debug('Found example queue thread dead. Restarting.')
                     new_t = Thread(target=self.fill_example_queue)
                     self._example_q_threads[idx] = new_t
                     new_t.daemon = True
                     new_t.start()
             for idx, t in enumerate(self._batch_q_threads):
                 if not t.is_alive():  # if the thread is dead
-                    tf.compat.v1.logging.error('Found batch queue thread dead. Restarting.')
+                    logger.debug('Found batch queue thread dead. Restarting.')
                     new_t = Thread(target=self.fill_batch_queue)
                     self._batch_q_threads[idx] = new_t
                     new_t.daemon = True
@@ -301,10 +295,10 @@ class Batcher(object):
                 article_text = e['article']
                 abstract_text = e['abstract']
             except ValueError:
-                tf.compat.v1.logging.error('Failed to get article or abstract from example')
+                logger.debug('Failed to get article or abstract from example')
                 continue
             if len(article_text) == 0:  # See https://github.com/abisee/pointer-generator/issues/1
-                # tf.compat.v1.logging.warning('Found an example with empty article text. Skipping it.')
+                logger.debug('Found an example with empty article text. Skipping it.')
                 continue
             else:
-                yield (example_id, article_text, abstract_text)
+                yield example_id, article_text, abstract_text

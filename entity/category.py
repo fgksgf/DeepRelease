@@ -1,4 +1,4 @@
-# Copyright 2021 Hoshea Jiang
+# Copyright 2022 Hoshea Jiang
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ class Category(Enum):
     Features = 0
     F = 0
 
-    BugFixes = 1
+    BugFix = 1
     B = 1
 
     Documentation = 2
@@ -29,6 +29,6 @@ class Category(Enum):
 
 
 class EntryCategory:
-    def __init__(self, entry_id, category: Category):
+    def __init__(self, entry_id: int, category: Category):
         self.entry_id = entry_id
         self.category = category
