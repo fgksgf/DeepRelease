@@ -21,7 +21,7 @@ inputs:
   repo:
     description: '<owner>/<repository>'
     required: false
-    default: ${{ env.GITHUB_REPOSITORY}}
+    default: ${{ github.repository }}
   token:
     description: 'A secret token'
     required: false
