@@ -67,7 +67,8 @@ class PullRequestsCollector(Collector):
                     pr = PullRequest(url, commit.get('oid'))
                     pr_data = self.client.get_pull_request_info(owner, name, pr.number)
                     if pr_data.get('errors') is not None:
-                        logger.warning(f'Failed to get pull request #{pr.number} info: {pr_data.get("errors")[0].get("message")}')
+                        err_msg = pr_data.get('errors')[0].get('message')
+                        logger.warning(f'Failed to get info from #{pr.number}: {err_msg}')
                     pr.set_data(pr_data.get('data').get('repository').get('pullRequest'))
                     prs.append(pr)
                 else:
