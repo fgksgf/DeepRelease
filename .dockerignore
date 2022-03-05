@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM ghcr.io/fgksgf/deeprelease-base:0.1.0
-
-WORKDIR /app
-
-COPY . .
-
-ENTRYPOINT ["python", "deeprelease.py"]
+.pytest_cache/
+.github/
+.idea/

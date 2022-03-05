@@ -29,7 +29,7 @@ inputs:
   debug:
     description: 'Enable debug mode, `True` or `False`'
     requied: false
-    default: 'True'
+    default: 'False'
   save_dir:
     description: 'The directory to save the generated release notes'
     required: false
