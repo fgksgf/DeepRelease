@@ -38,7 +38,6 @@ class AbstractClient(ABC):
         pass
 
 
-
 class Client(AbstractClient):
     def __init__(self, token='', api_url=Constants.GITHUB_API_URL):
         self.api_url = api_url
@@ -129,7 +128,8 @@ class Client(AbstractClient):
             date = repo.get_commit(commit).commit.committer.date.strftime("%Y-%m-%dT%H:%M:%SZ")
             return commit, date
         else:
-            raise Exception('No tags found')
+            logger.warning('Can not find git tags')
+            return 'None', repo.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     def get_pull_requests_since(self, owner: str, name: str, since: str):
         """
@@ -197,4 +197,3 @@ class Client(AbstractClient):
                 return content
 
         return ''
-

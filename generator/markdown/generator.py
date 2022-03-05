@@ -51,7 +51,7 @@ class MarkdownGenerator(Generator):
 
     @staticmethod
     def save(content: str, save_dir: str, save_name: str):
-        with open(f'{save_dir}/{save_name}.md', 'w') as f:
+        with open(f'{save_dir}/{save_name}', 'w') as f:
             f.write(content)
 
     def generate(self, entries: [Entry], categories: [Category], **kwargs):

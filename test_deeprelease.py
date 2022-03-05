@@ -12,15 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-VERSION ?= latest
+import pytest
+
+from deeprelease import split_owner_repo
 
 
-lint:
-	flake8 --version || pip install flake8
-	flake8 .
-
-ut:
-	pytest
-
-ut_in_docker:
-	docker run --rm -v $(shell pwd):/app --entrypoint="pytest" ghcr.io/fgksgf/deeprelease-base:0.1.0
+@pytest.mark.parametrize("test_input,expected", [
+    ("foo/bar", ("foo", "bar")),
+    ("owner/name", ("owner", "name")),
+])
+def test_split_owner_repo(test_input, expected):
+    assert split_owner_repo(test_input) == expected

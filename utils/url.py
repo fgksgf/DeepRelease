@@ -14,7 +14,7 @@
 
 import re
 
-PR_URL_PATTERN = re.compile(r'https://github\.com/[0-9a-z\-]+/[0-9a-z\-]+/pull/\d+')
+PR_URL_PATTERN = re.compile(r'https://github\.com/[0-9a-z\-]+/[0-9a-zA-Z\-]+/pull/\d+')
 
 
 def parse_pull_request_url(url: str):
@@ -33,7 +33,7 @@ def parse_pull_request_url(url: str):
     return owner, name, pr_number
 
 
-def check_pull_request_url(url: str):
+def pull_request_url_is_valid(url: str):
     """
     Check if the url is a valid pull request url.
 

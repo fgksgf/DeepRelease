@@ -74,7 +74,7 @@ def try_load_state(model_file_path):
             raise FileNotFoundError
         try:
             state = torch.load(model_file_path, map_location=lambda storage, location: storage)
-        except:
+        except Exception:
             time.sleep(30)
             counter += 1
             continue

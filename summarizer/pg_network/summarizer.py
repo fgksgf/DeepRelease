@@ -32,6 +32,10 @@ TMP_DIR = '/tmp/deeprelease'
 class EntrySummarizer(Summarizer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        model_path = kwargs.get('model_path', '/models/pg_network')
+        if not os.path.exists(model_path):
+            logger.error(f'The Discriminator model file {model_path} does not exist')
+            exit(1)
         if isdir(TMP_DIR) is False:
             os.mkdir(TMP_DIR)
 
@@ -72,7 +76,7 @@ class EntrySummarizer(Summarizer):
         return ' [sep] '.join(lst)
 
     @staticmethod
-    def decode(data_file, param_path="summarizer/pg_network/data/params.json", model_path="models/pg_network",
+    def decode(data_file, param_path="summarizer/pg_network/data/params.json", model_path="/models/pg_network",
                ngram_filter=1):
         params = utils.Params(param_path)
         decode_processor = BeamSearch(params, model_path, data_file=data_file, ngram_filter=ngram_filter)

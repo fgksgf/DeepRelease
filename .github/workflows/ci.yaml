@@ -21,33 +21,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout source codes
-        uses: actions/checkout@v2
-
-      - name: Set up Python 3.6
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.6
-
-      - name: Run flake8
-        uses: TrueBrain/actions-flake8@v2
-
   unit-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source codes
         uses: actions/checkout@v2
 
-      - name: Set up Python 3.6
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.6
-
-      - name: Set up dependencies
-        run: make install
-
-      - name: Run unit tests
-        run: make ut
+      - name: Run unit tests in docker
+        run: make ut_in_docker

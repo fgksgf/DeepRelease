@@ -12,15 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-VERSION ?= latest
-
-
-lint:
-	flake8 --version || pip install flake8
-	flake8 .
-
-ut:
-	pytest
-
-ut_in_docker:
-	docker run --rm -v $(shell pwd):/app --entrypoint="pytest" ghcr.io/fgksgf/deeprelease-base:0.1.0
+def has_related_pull_request(commit):
+    """Checks if the pull request has a related pull request."""
+    return len(commit.get('associatedPullRequests').get('nodes')) > 0
