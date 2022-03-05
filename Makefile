@@ -21,3 +21,6 @@ lint:
 
 ut:
 	pytest
+
+ut_in_docker:
+	docker run --rm -v $(shell pwd):/app --entrypoint="pytest" ghcr.io/fgksgf/deeprelease-base:0.1.0

@@ -27,5 +27,5 @@ jobs:
       - name: Checkout source codes
         uses: actions/checkout@v2
 
-      - name: Run unit tests
-        run: docker run --rm -v $(pwd):/app --entrypoint pytest ghcr.io/fgksgf/deeprelease-base:0.1.0 pytest
+      - name: Run unit tests in docker
+        run: make ut_in_docker
