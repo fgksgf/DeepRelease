@@ -21,6 +21,6 @@ RUN pip install pytest~=6.2.5 nltk~=3.6.7 requests~=2.26.0 loguru~=0.6.0 pygithu
     python -m nltk.downloader punkt
 
 # Copy the DL models to the container
-COPY models /app/models
+COPY models /models
 
 ENTRYPOINT ["/bin/bash"]

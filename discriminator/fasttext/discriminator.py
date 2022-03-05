@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 
 import fasttext
 from loguru import logger
@@ -26,7 +27,11 @@ fasttext.FastText.eprint = lambda x: None
 class CategoryDiscriminator(Discriminator):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.model = fasttext.load_model("models/fasttext.bin")
+        model_path = kwargs.get('model_path', '/models/fasttext.bin')
+        if not os.path.exists(model_path):
+            logger.error(f'The Discriminator model file {model_path} does not exist')
+            exit(1)
+        self.model = fasttext.load_model(model_path)
 
     def classify(self, items: [PullRequest]) -> [EntryCategory]:
         ret = []
