@@ -14,13 +14,13 @@
 
 import pytest
 
-from utils.url import check_pull_request_url, parse_pull_request_url
+from utils.url import pull_request_url_is_valid, parse_pull_request_url
 
 
 @pytest.mark.parametrize("url, expected", [('https://github.com/apache/skywalking-python/pull/175', True),
                                            ('https://google.com', False)])
 def test_check_pull_request_url(url, expected):
-    assert check_pull_request_url(url) == expected
+    assert pull_request_url_is_valid(url) == expected
 
 
 @pytest.mark.parametrize("url, expected", [

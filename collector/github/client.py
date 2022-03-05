@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import base64
+import datetime
 import os
 from abc import ABC, abstractmethod
 from typing import Tuple
@@ -36,7 +37,6 @@ class AbstractClient(ABC):
     @abstractmethod
     def get_pull_request_info(self, owner, name, num):
         pass
-
 
 
 class Client(AbstractClient):
@@ -129,7 +129,9 @@ class Client(AbstractClient):
             date = repo.get_commit(commit).commit.committer.date.strftime("%Y-%m-%dT%H:%M:%SZ")
             return commit, date
         else:
-            raise Exception('No tags found')
+            logger.warning(f'Can not find git tags')
+            return 'None', repo.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
+            # exit(1)
 
     def get_pull_requests_since(self, owner: str, name: str, since: str):
         """

@@ -20,6 +20,8 @@ from discriminator.fasttext.utils import convert_str_to_category
 from entity.category import EntryCategory
 from entity.pull_request import PullRequest
 
+fasttext.FastText.eprint = lambda x: None
+
 
 class CategoryDiscriminator(Discriminator):
     def __init__(self, **kwargs):

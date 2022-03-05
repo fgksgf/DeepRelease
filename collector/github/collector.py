@@ -16,8 +16,9 @@ from loguru import logger
 
 from collector.base import Collector
 from collector.github.client import AbstractClient
+from collector.github.utils import has_related_pull_request
 from entity.pull_request import PullRequest
-from utils.url import check_pull_request_url
+from utils.url import pull_request_url_is_valid
 
 
 class PullRequestsCollector(Collector):
@@ -46,25 +47,32 @@ class PullRequestsCollector(Collector):
             logger.error(f'failed to get pull requests since {date}: {err_msg}')
             return []
 
-        nodes = data.get('data').get('repository').get('defaultBranchRef').get('target').get('history').get(
+        commits = data.get('data').get('repository').get('defaultBranchRef').get('target').get('history').get(
             'nodes')[:-1]  # noqa: E501
-        if len(nodes) == 0:
-            logger.error(f"No pull requests since {date}")
+        if len(commits) == 0:
             return []
-        logger.debug(f'Collect {len(nodes)} pull requests since last release at {date}')
+        logger.debug(f'{len(commits)} commits since last release at {date}')
 
         prs = []
-        for node in nodes:
+
+        for commit in commits:
+            if not has_related_pull_request(commit):
+                logger.debug(f'Commit {commit.get("oid")} has no related pull request')
+                continue
+
+            url = commit.get('associatedPullRequests').get('nodes')[0].get('url')
             try:
-                url = node.get('associatedPullRequests').get('nodes')[0].get('url')
-                commit = node.get('oid')
-                if check_pull_request_url(url):
-                    pr = PullRequest(url, commit)
+                if pull_request_url_is_valid(url):
+                    logger.debug(f'Processing pull request: {url}')
+                    pr = PullRequest(url, commit.get('oid'))
                     pr_data = self.client.get_pull_request_info(owner, name, pr.number)
                     if pr_data.get('errors') is not None:
-                        raise Exception(pr_data.get('errors')[0].get('message'))
+                        logger.warning(f'Failed to get pull request #{pr.number} info: {pr_data.get("errors")[0].get("message")}')
                     pr.set_data(pr_data.get('data').get('repository').get('pullRequest'))
                     prs.append(pr)
+                else:
+                    logger.debug(f'Invalid pull request url: {url}')
             except Exception as e:
-                logger.warning(f'failed to process pull request: {e}')
+                logger.warning(f'Failed to process the pull request {url}: {e}')
+
         return prs

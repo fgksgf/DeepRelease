@@ -1,0 +1,54 @@
+# Copyright 2022 Hoshea Jiang
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: 'DeepRelease'
+description: 'A Deep Learning-based, Language-agnostic Release Notes Generation Tool.'
+branding:
+  icon: 'box'
+  color: 'gray-dark'
+inputs:
+  repo:
+    description: '<owner>/<repository>'
+    required: false
+    default: ${{ env.GITHUB_REPOSITORY}}
+  token:
+    description: 'A secret token'
+    required: false
+    default: ${{ github.token }}
+  debug:
+    description: 'Enable debug mode, `True` or `False`'
+    requied: false
+    default: 'True'
+  save_dir:
+    description: 'The directory to save the generated release notes'
+    required: false
+    default: '.'
+  save_name:
+    description: 'The file name of the generated release notes'
+    required: false
+    default: 'release-notes.md'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    GITHUB_TOKEN: ${{ inputs.token }}
+  args:
+    - run
+    - --repo
+    - ${{ inputs.repo }}
+    - --save_dir
+    - ${{ inputs.save_dir }}
+    - --save_name
+    - ${{ inputs.save_name }}
+    - --debug=${{ inputs.debug }}
