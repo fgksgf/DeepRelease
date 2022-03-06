@@ -14,7 +14,7 @@
 
 import pytest
 
-from utils.url import pull_request_url_is_valid, parse_pull_request_url
+from collector.github.utils import pull_request_url_is_valid, has_related_pull_request
 
 
 @pytest.mark.parametrize("url, expected", [('https://github.com/apache/skywalking-python/pull/175', True),
@@ -23,7 +23,9 @@ def test_check_pull_request_url(url, expected):
     assert pull_request_url_is_valid(url) == expected
 
 
-@pytest.mark.parametrize("url, expected", [
-    ('https://github.com/apache/skywalking-python/pull/175', ('apache', 'skywalking-python', 175))])
-def test_parse_pull_request_url(url, expected):
-    assert parse_pull_request_url(url) == expected
+@pytest.mark.parametrize("commit, expected", [
+    ({'associatedPullRequests': {'nodes': []}}, False),
+    ({'associatedPullRequests': {'nodes': [1, 2, 3]}}, True),
+])
+def test_has_related_pull_request(commit: dict, expected: bool):
+    assert has_related_pull_request(commit) == expected

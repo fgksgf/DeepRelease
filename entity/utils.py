@@ -114,3 +114,19 @@ def remove_ref_and_mention(s: str) -> str:
     ret = PATTERNS['reference_pattern'].sub('', ret)
     ret = PATTERNS['url_pattern'].sub('', ret)
     return re.sub(r'\((,|\s)*\)', '', ret).strip()
+
+
+def parse_pull_request_url(url: str):
+    """
+    Parse the PR url to get the repo's owner, name and the pull request number.
+
+    :param url: The url of the pull request.
+    :return: A tuple with the repo's owner, name and the pull request number.
+    """
+    owner, name, pr_number = '', '', ''
+    url_parts = url.split("/")
+    if len(url_parts) == 7:
+        name = url_parts[-3]
+        owner = url_parts[-4]
+        pr_number = int(url_parts[-1])
+    return owner, name, pr_number

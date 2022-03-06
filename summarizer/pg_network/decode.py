@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import time
 import copy
 import torch
@@ -70,9 +69,9 @@ class Beam(object):
 
 class BeamSearch(object):
     def __init__(self, params, model_file_path, data_file, ngram_filter=False):
-        self.vocab = Vocab(params.vocab_path, params.vocab_size)
-        decode_data_path = os.path.join(params.data_dir, data_file)
-        self.batcher = Batcher(params, decode_data_path, self.vocab, mode='decode',
+        self.vocab = Vocab()
+        # decode_data_path = os.path.join(params.data_dir, data_file)
+        self.batcher = Batcher(params, data_file, self.vocab, mode='decode',
                                batch_size=params.beam_size, single_pass=True)
         self.pad_id = self.vocab.word2id(data.PAD_TOKEN)
         assert (self.pad_id == 1)

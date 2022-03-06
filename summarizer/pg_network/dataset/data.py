@@ -16,11 +16,11 @@
 
 import sys
 import csv
-import json
-from collections import Counter
 
 # <s> and </s> are used in the data files to segment the abstracts into sentences. They don't receive vocab ids.
 from loguru import logger
+
+from summarizer.pg_network.vocab import WORD_TO_ID, ID_TO_WORD
 
 SENTENCE_START = '<s>'
 SENTENCE_END = '</s>'
@@ -33,45 +33,11 @@ STOP_DECODING = '[STOP]'  # This has a vocab id, which is used at the end of unt
 csv.field_size_limit(sys.maxsize)
 
 
-# Note: none of <s>, </s>, [PAD], [UNK], [START], [STOP] should appear in the vocab file.
-
-
 class Vocab(object):
-
-    def __init__(self, vocab_file, max_size):
-        self._word_to_id = {}
-        self._id_to_word = {}
-        self._count = 0  # keeps track of total number of words in the Vocab
-
-        # [UNK], [PAD], [START] and [STOP] get the ids 0,1,2,3.
-        for w in [UNKNOWN_TOKEN, PAD_TOKEN, START_DECODING, STOP_DECODING]:
-            self._word_to_id[w] = self._count
-            self._id_to_word[self._count] = w
-            self._count += 1
-
-        # Read the vocab file and add words up to max_size
-        with open(vocab_file, 'r') as vocab_f:
-            # the dict of counter
-            counter = Counter(json.load(vocab_f))
-        for token in [SENTENCE_START, SENTENCE_END, UNKNOWN_TOKEN, PAD_TOKEN, START_DECODING, STOP_DECODING]:
-            del counter[token]
-
-        # alphabetical
-        words_and_frequencies = sorted(counter.items(), key=lambda tup: tup[0])
-        # list of (word, freq)
-        words_and_frequencies.sort(key=lambda tup: tup[1], reverse=True)
-
-        for w, freq in words_and_frequencies:
-            self._word_to_id[w] = self._count
-            self._id_to_word[self._count] = w
-            self._count += 1
-            if 0 < max_size <= self._count:
-                logger.debug("max_size of vocab was specified as %i; we now have %i words. Stopping reading." % (
-                    max_size, self._count))
-                break
-
-        logger.debug("Finished constructing vocabulary of %i total words. Last word added: %s" % (
-            self._count, self._id_to_word[self._count - 1]))
+    def __init__(self):
+        self._word_to_id = WORD_TO_ID
+        self._id_to_word = ID_TO_WORD
+        self._count = len(self._word_to_id)
 
     def word2id(self, word):
         if word not in self._word_to_id:

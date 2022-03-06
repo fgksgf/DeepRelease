@@ -14,8 +14,6 @@
 
 FROM ghcr.io/fgksgf/deeprelease-base:0.1.0
 
-WORKDIR /app
+COPY . /
 
-COPY . .
-
-ENTRYPOINT ["python", "deeprelease.py"]
+ENTRYPOINT ["python", "/deeprelease.py"]

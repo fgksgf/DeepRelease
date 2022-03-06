@@ -19,8 +19,5 @@ lint:
 	flake8 --version || pip install flake8
 	flake8 .
 
-ut:
-	pytest
-
 ut_in_docker:
-	docker run --rm -v $(shell pwd):/app --entrypoint="pytest" ghcr.io/fgksgf/deeprelease-base:0.1.0
+	docker run --rm --workdir /home -v $(shell pwd):/home --entrypoint="pytest" ghcr.io/fgksgf/deeprelease-base:0.1.0

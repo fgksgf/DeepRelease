@@ -15,34 +15,13 @@
 import re
 import sys
 import csv
-import json
 import time
+from typing import Any
+
 import torch
 from nltk import sent_tokenize
 
 csv.field_size_limit(sys.maxsize)
-
-
-class Params:
-    def __init__(self, json_path):
-        with open(json_path) as f:
-            params = json.load(f)
-            self.__dict__.update(params)
-
-    def save(self, json_path):
-        with open(json_path, 'w') as f:
-            json.dump(self.__dict__, f, indent=4)
-
-    def update(self, json_path):
-        """Loads parameters from json file"""
-        with open(json_path) as f:
-            params = json.load(f)
-            self.__dict__.update(params)
-
-    @property
-    def dict(self):
-        """Gives dict-like access to Params instance by `params.dict['learning_rate']"""
-        return self.__dict__
 
 
 def make_html_safe(s):
@@ -113,3 +92,16 @@ def ext_art_sent_tokenize(text):
 
 def ext_abs_sent_tokenize(text):
     return sent_tokenize(text)
+
+
+def all_same(items: [Any]) -> bool:
+    """
+    Return True if all items are the same.
+
+    Args:
+        items: a list of items.
+
+    Returns:
+        True if all items are the same.
+    """
+    return all(x == items[0] for x in items)
