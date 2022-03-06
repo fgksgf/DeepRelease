@@ -27,4 +27,4 @@ jobs:
           type: create
           body: ${{ steps.vars.outputs.content }}
           issue_number: ${{ github.event.number }}
-          token: ${{ secrets.GITHUB_TOKEN }
+          token: ${{ secrets.GITHUB_TOKEN }}
