@@ -15,4 +15,8 @@ if [[ -z "$GITHUB_TOKEN" ]]; then
 	exit 1
 fi
 
-python /app/deeprelease.py "$@"
+pwd
+
+ls
+
+python /deeprelease.py "$@"

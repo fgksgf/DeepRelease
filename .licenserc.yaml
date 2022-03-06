@@ -24,6 +24,7 @@ header:
     - '**/*.csv'
     - 'LICENSE'
     - '.flake8'
+    - 'entrypoint.sh'
     - '.github/**'
     - '.gitignore'
     - '**/.pytest_cache/**'

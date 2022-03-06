@@ -14,6 +14,6 @@
 
 FROM ghcr.io/fgksgf/deeprelease-base:0.1.0
 
-COPY . /app
+COPY . /
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
