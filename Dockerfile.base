@@ -14,11 +14,9 @@
 
 FROM python:3.6.15-slim
 
-WORKDIR /app
-
 RUN pip install pytest~=6.2.5 nltk~=3.6.7 requests~=2.26.0 loguru~=0.6.0 pygithub~=1.55 numpy~=1.19.5 fire~=0.4.0 fasttext-wheel==0.9.2 && \
     pip install torch==1.10.0+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html && \
-    python -m nltk.downloader punkt
+    python -m nltk.downloader punkt -d /usr/local/share/nltk_data/
 
 # Copy the DL models to the container
 COPY models /models
