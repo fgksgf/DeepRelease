@@ -1,31 +1,31 @@
-# name: CI
-#
-# on:
-#   pull_request:
-#     branches:
-#       - master
-#
-# concurrency:
-#   group: ci-it-${{ github.event.pull_request.number || github.ref }}
-#   cancel-in-progress: true
-#
-# jobs:
-#   check-license:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout source codes
-#         uses: actions/checkout@v2
-#
-#       - name: Check License
-#         uses: apache/skywalking-eyes@main
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#
-#   unit-test:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout source codes
-#         uses: actions/checkout@v2
-#
-#       - name: Run unit tests in docker
-#         run: make ut_in_docker
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - master
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-license:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source codes
+        uses: actions/checkout@v2
+
+      - name: Check License
+        uses: apache/skywalking-eyes@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source codes
+        uses: actions/checkout@v2
+
+      - name: Run unit tests in docker
+        run: make ut_in_docker

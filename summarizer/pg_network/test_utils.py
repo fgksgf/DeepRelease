@@ -12,17 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any
+import pytest
+
+from summarizer.pg_network.utils import all_same
 
 
-def all_same(items: [Any]) -> bool:
-    """
-    Return True if all items are the same.
-
-    Args:
-        items: a list of items.
-
-    Returns:
-        True if all items are the same.
-    """
-    return all(x == items[0] for x in items)
+@pytest.mark.parametrize("test_input,expected", [
+    ([1, 1, 1], True),
+    (['1', '1', '1'], True),
+    ([1, 2, 3], False),
+    (['1', '2', '3'], False),
+])
+def test_all_same(test_input, expected):
+    assert all_same(test_input) == expected

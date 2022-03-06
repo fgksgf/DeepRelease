@@ -16,7 +16,6 @@ jobs:
       - name: Generate the release notes
         uses: fgksgf/DeepRelease@debug-gha
         with:
-          repo: 'apache/skywalking-python'
           debug: 'True'
 
       - name: Check the file
