@@ -27,7 +27,7 @@ from summarizer.pg_network.decode import BeamSearch
 from summarizer.pg_network.params import Params
 
 TMP_DIR = '/tmp/deeprelease'
-MODEL_PATH = 'models/pg_network'
+MODEL_PATH = '/models/pg_network'
 
 
 class EntrySummarizer(Summarizer):
