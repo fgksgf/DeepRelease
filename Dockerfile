@@ -16,4 +16,4 @@ FROM ghcr.io/fgksgf/deeprelease-base:0.1.0
 
 COPY . /
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["python", "/deeprelease.py"]

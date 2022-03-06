@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Generate the release notes
-        uses: fgksgf/DeepRelease@master
+        uses: fgksgf/DeepRelease@debug-gha
         with:
           repo: 'apache/skywalking-python'
           debug: 'True'
