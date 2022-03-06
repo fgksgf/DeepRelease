@@ -14,20 +14,22 @@
 #
 import unittest
 
+import pytest
+
 from entity.category import Category, EntryCategory
 from entity.entry import Entry
-from generator.markdown.generator import MarkdownGenerator
+from generator.markdown.generator import MarkdownGenerator, process_single_category, process_single_entry, capitalize
 
 
 class TestMarkdownGenerator(unittest.TestCase):
     generator = MarkdownGenerator()
 
     entries = [
-        Entry(11, "Fix bug A"),
-        Entry(12, "Fix bug B"),
-        Entry(13, "Fix bug C"),
-        Entry(14, "Add feature A"),
-        Entry(15, "Add feature B"),
+        Entry(11, "fix bug A"),
+        Entry(12, "fix bug B"),
+        Entry(13, "fix bug C"),
+        Entry(14, "add feature A"),
+        Entry(15, "add feature B"),
     ]
     entry_categories = [
         EntryCategory(11, Category.BugFix),
@@ -56,3 +58,29 @@ class TestMarkdownGenerator(unittest.TestCase):
         content = self.generator.generate_content(groups)
         expected_content = """\n## Features\n\n- Add feature A (#14)\n- Add feature B (#15)\n\n## BugFix\n\n- Fix bug A (#11)\n- Fix bug B (#12)\n- Fix bug C (#13)\n"""
         self.assertEqual(expected_content, content)
+
+
+@pytest.mark.parametrize("inputs, expected", [
+    (Category.Features, '\n## Features\n'),
+])
+def test_process_single_category(inputs: Category, expected: str):
+    assert process_single_category(inputs) == expected
+
+
+@pytest.mark.parametrize("inputs, expected", [
+    (Entry(1, "fix bug A"), '- Fix bug A (#1)'),
+    (Entry(2, "add feature b"), '- Add feature b (#2)'),
+])
+def test_process_single_entry(inputs: Entry, expected: str):
+    assert process_single_entry(inputs) == expected
+
+
+@pytest.mark.parametrize("s, expected", [
+    ("fix bug A", "Fix bug A"),
+    ("add feature b", "Add feature b"),
+    ("a", "A"),
+    ("", ""),
+    (None, None),
+])
+def test_capitalize(s, expected):
+    assert capitalize(s) == expected

@@ -15,9 +15,16 @@ jobs:
     steps:
       - name: Generate the release notes
         uses: fgksgf/DeepRelease@debug-gha
-        with:
-          debug: 'True'
 
       - name: Check the file
-        run: cat release-notes.md
+        id: vars
+        run: echo "::set-output name=content::$(cat release-notes.md)"
 
+      - name: Create comment
+        uses: jungwinter/comment@v1
+        id: create
+        with:
+          type: create
+          body: ${{ steps.vars.outputs.content }}
+          issue_number: ${{ github.event.number }}
+          token: ${{ secrets.GITHUB_TOKEN }

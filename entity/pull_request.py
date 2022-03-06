@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from utils.preprocess import preprocess_desc_and_commits, preprocess_title
-from utils.url import parse_pull_request_url
+from entity.utils import preprocess_title, preprocess_desc_and_commits, parse_pull_request_url
 
 
 class PullRequest:

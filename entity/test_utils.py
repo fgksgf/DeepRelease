@@ -14,7 +14,7 @@
 
 import pytest
 
-from utils.preprocess import preprocess_title, preprocess_desc_and_commits
+from entity.utils import parse_pull_request_url, preprocess_title, preprocess_desc_and_commits
 
 
 class TestUtils:
@@ -38,3 +38,8 @@ class TestUtils:
     ])
     def test_preprocess_desc_and_commits(self, text, expected):
         assert preprocess_desc_and_commits(text) == expected
+
+    @pytest.mark.parametrize("url, expected", [
+        ('https://github.com/apache/skywalking-python/pull/175', ('apache', 'skywalking-python', 175))])
+    def test_parse_pull_request_url(self, url, expected):
+        assert parse_pull_request_url(url) == expected
