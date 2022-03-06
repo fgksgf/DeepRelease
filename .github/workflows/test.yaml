@@ -20,6 +20,9 @@ jobs:
         id: vars
         run: echo "::set-output name=content::$(cat release-notes.md)"
 
+      - name: Test output
+        run: echo "${{ steps.vars.outputs.content }}"
+
       - name: Create comment
         uses: jungwinter/comment@v1
         id: create
