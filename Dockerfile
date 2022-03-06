@@ -14,7 +14,7 @@
 
 FROM ghcr.io/fgksgf/deeprelease-base:0.1.0
 
-WORKDIR /app
+WORKDIR /github/workspace
 
 COPY . .
 
