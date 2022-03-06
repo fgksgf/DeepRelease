@@ -15,6 +15,7 @@ jobs:
     steps:
       - name: Generate the release notes
         uses: fgksgf/DeepRelease@master
+        working-directory: /app
         with:
           repo: 'apache/skywalking-python'
           debug: 'True'
