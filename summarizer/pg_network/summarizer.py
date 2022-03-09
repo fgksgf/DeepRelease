@@ -33,9 +33,9 @@ MODEL_PATH = '/models/pg_network'
 class EntrySummarizer(Summarizer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        model_path = kwargs.get('model_path', MODEL_PATH)
-        if not os.path.exists(model_path):
-            logger.error(f'The Discriminator model file {model_path} does not exist')
+        self.model_path = kwargs.get('model_path', MODEL_PATH)
+        if not os.path.exists(self.model_path):
+            logger.error(f'The Discriminator model file {self.model_path} does not exist')
             exit(1)
         if isdir(TMP_DIR) is False:
             os.mkdir(TMP_DIR)
@@ -45,7 +45,7 @@ class EntrySummarizer(Summarizer):
         logger.debug(f'Saving input to {data_file_name}')
 
         rows = self.save_input_to_csv(items, data_file_name)
-        abstracts = self.decode(data_file_name)
+        abstracts = self.decode(data_file_name, self.model_path)
         logger.debug(f'Model output: {abstracts}')
 
         if len(items) != len(abstracts):
@@ -77,7 +77,7 @@ class EntrySummarizer(Summarizer):
         return ' [sep] '.join(lst)
 
     @staticmethod
-    def decode(data_file, model_path=MODEL_PATH, ngram_filter=1):
+    def decode(data_file, model_path, ngram_filter=1):
         params = Params()
         decode_processor = BeamSearch(params, model_path, data_file=data_file, ngram_filter=ngram_filter)
         return decode_processor.decode()

@@ -203,7 +203,7 @@ class Client(AbstractClient):
         except Exception as e:
             logger.error(f"Error while fetching PRs' URLs from {since} to {until}: {e}")
         finally:
-            return ret
+            return list(set(ret))
 
     def get_template_content(self, owner: str, name: str) -> str:
         """
