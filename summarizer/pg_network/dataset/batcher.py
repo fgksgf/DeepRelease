@@ -205,11 +205,11 @@ class Batcher(object):
     def next_batch(self):
         # If the batch queue is empty, print a warning
         if self._batch_queue.qsize() == 0:
-            logger.debug(
+            logger.trace(
                 'Bucket input queue is empty when calling next_batch. Bucket queue size: %i, Input queue size: %i',
                 self._batch_queue.qsize(), self._example_queue.qsize())
             if self._single_pass and self._finished_reading:
-                logger.debug("Finished reading dataset in single_pass mode.")
+                logger.trace("Finished reading dataset in single_pass mode.")
                 return None
 
         batch = self._batch_queue.get()  # get the next Batch
@@ -223,10 +223,10 @@ class Batcher(object):
                 (ex_id, article, abstract) = next(
                     input_gen)  # read the next example from file. article and abstract are both strings.
             except StopIteration:  # if there are no more examples:
-                logger.debug(
+                logger.trace(
                     "The example generator for this example queue filling thread has exhausted data.")
                 if self._single_pass:
-                    logger.debug(
+                    logger.trace(
                         "single_pass mode is on, so we've finished reading dataset. This thread is stopping.")
                     self._finished_reading = True
                     break

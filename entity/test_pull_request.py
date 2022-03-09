@@ -18,25 +18,19 @@ from entity.pull_request import PullRequest
 
 
 class TestPullRequest(unittest.TestCase):
-    pr = PullRequest('test', 'test')
+    pr = PullRequest('https://github.com/foo/bar/pull/1')
 
     def test_init(self):
-        self.assertEqual(self.pr.url, 'test')
-        self.assertEqual(self.pr.commit, 'test')
+        self.assertEqual(self.pr.url, 'https://github.com/foo/bar/pull/1')
+        self.assertEqual(self.pr.owner, 'foo')
+        self.assertEqual(self.pr.name, 'bar')
+        self.assertEqual(self.pr.number, 1)
 
     def test_set_data(self):
         data = {
             'title': ' test 测试 @test #55 ',
-            'bodyText': ' test 测试\n @test test@test.com ### ',
-            'commits': {
-                'nodes': [
-                    {
-                        'commit': {
-                            'message': '',
-                        },
-                    }
-                ]
-            }
+            'desc': ' test 测试\n @test test@test.com ### ',
+            'commits': []
         }
         self.pr.set_data(data)
         self.assertEqual(['test'], self.pr.title)

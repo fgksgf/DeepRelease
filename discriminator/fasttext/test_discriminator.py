@@ -29,11 +29,11 @@ titles = [
 def prepare_data():
     ret = []
     for title in titles:
-        pr = PullRequest('test', 'test')
+        pr = PullRequest('test')
         data = {
             'title': f'{title}',
-            'bodyText': '',
-            'commits': {'nodes': [{'commit': {'message': ''}}]}
+            'desc': '',
+            'commits': []
         }
         pr.set_data(data)
         ret.append(pr)

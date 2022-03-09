@@ -16,9 +16,8 @@ from entity.utils import preprocess_title, preprocess_desc_and_commits, parse_pu
 
 
 class PullRequest:
-    def __init__(self, url, commit):
+    def __init__(self, url):
         self.url = url
-        self.commit = commit
         self.owner, self.name, self.number = parse_pull_request_url(url)
 
         self.title = []
@@ -33,12 +32,8 @@ class PullRequest:
         :return:
         """
         self.title = preprocess_title(data.get('title'))
-        self.description = preprocess_desc_and_commits(data.get('bodyText'))
-        commits = data.get('commits').get('nodes')
-        temp = []
-        for cm in commits:
-            temp.append(cm.get('commit').get('message'))
-        self.commit_messages = preprocess_desc_and_commits(' '.join(temp))
+        self.description = preprocess_desc_and_commits(data.get('desc'))
+        self.commit_messages = preprocess_desc_and_commits(' '.join(data.get('commits')))
 
     @property
     def id(self):
