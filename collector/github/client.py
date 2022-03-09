@@ -13,13 +13,14 @@
 # limitations under the License.
 
 import base64
-import os
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import Tuple
 
 import requests
 from loguru import logger
 
+from collector.github.utils import has_related_pull_request, convert_to_git_timestamp
 from config.constants import Constants
 from github import Github
 
@@ -30,80 +31,78 @@ class AbstractClient(ABC):
         pass
 
     @abstractmethod
-    def get_pull_requests_since(self, owner: str, name: str, since: str):
+    def get_pull_requests_during(self, owner: str, name: str, since: str, until: str = None) -> [str]:
         pass
 
     @abstractmethod
-    def get_pull_request_info(self, owner, name, num):
+    def get_pull_request_info(self, owner: str, name: str, num: int) -> dict:
         pass
 
 
 class Client(AbstractClient):
-    def __init__(self, token='', api_url=Constants.GITHUB_API_URL):
+    def __init__(self, token, api_url=Constants.GITHUB_API_URL):
         self.api_url = api_url
-        if token == '':
-            os.getenv('GHA_TOKEN', '')
-
         self.headers = {"Authorization": "token " + token}
         self.client = Github(token)
 
-    def query_without_variables(self, query):
+    def __query_graphql_api(self, query: str, variables: dict = None) -> dict:
         """
-        Use `requests.post` to make the API call without variables.
+        Use `requests.post` to make the GitHub GraphQL API call with variables.
 
-        :param query:
-        :return:
+        Args:
+            query: the GraphQL query.
+            variables: variables for the query, if any.
+
+        Returns:
+            The response of the API call.
         """
+
+        request_body = {
+            'query': query,
+        }
+        if variables is not None:
+            request_body['variables'] = variables
+
         response = requests.post(self.api_url,
-                                 json={'query': query},
+                                 json=request_body,
                                  headers=self.headers)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise Exception("Query failed to run by returning code of {}. {}".format(response.status_code, query))
-
-    def query_with_variables(self, query, variables):
-        """
-        Use `requests.post` to make the API call with variables.
-
-        :param query:
-        :param variables:
-        :return:
-        """
-        response = requests.post(self.api_url,
-                                 json={'query': query, 'variables': variables},
-                                 headers=self.headers)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise Exception("Query failed to run by returning code of {}. {}".format(response.status_code, query))
+        response.raise_for_status()
+        data = response.json()
+        if data.get('errors') is not None:
+            err_msg = data.get('errors')[0].get('message')
+            raise Exception(f'Bad query: {err_msg}')
+        return data
 
     def get_pull_request_info(self, owner, name, num):
         """
         Get the information of a pull request.
 
-        :param owner: the owner of the repository.
-        :param name: the name of the repository.
-        :param num: the number of the pull request.
-        :return:
+        Args:
+            owner: the owner of the repository.
+            name: the name of the repository.
+            num: the number of the pull request.
+
+        Returns:
+            A dict containing the information of the pull request, which has the following keys: title, desc and commits.
         """
+
         query = '''
-            query($owner : String!, $name: String!, $num: Int!) {
-                repository(name: $name, owner: $owner) {
-                    pullRequest(number: $num) {
-                        commits(first: 10) {
-                            nodes {
-                                commit {
-                                    message
+                query($owner : String!, $name: String!, $num: Int!) {
+                    repository(name: $name, owner: $owner) {
+                        pullRequest(number: $num) {
+                            commits(first: 10) {
+                                nodes {
+                                    commit {
+                                        message
+                                    }
                                 }
                             }
+                            title
+                            bodyText
                         }
-                        title
-                        bodyText
                     }
                 }
-            }
-        '''
+            '''
 
         variables = {
             "owner": owner,
@@ -111,7 +110,19 @@ class Client(AbstractClient):
             "num": num
         }
 
-        return self.query_with_variables(query, variables)
+        ret = {}
+        try:
+            data = self.__query_graphql_api(query, variables)
+            ret['title'] = data['data']['repository']['pullRequest']['title']
+            ret['desc'] = data['data']['repository']['pullRequest']['bodyText']
+            commit_msgs = []
+            for node in data['data']['repository']['pullRequest']['commits']['nodes']:
+                commit_msgs.append(node.get('commit').get('message'))
+            ret['commits'] = commit_msgs
+        except Exception as e:
+            logger.error(f'Failed to get pull request info: {e}')
+            return None
+        return ret
 
     def get_last_release(self, owner: str, name: str) -> Tuple[str, str]:
         """
@@ -125,33 +136,40 @@ class Client(AbstractClient):
         tags = repo.get_tags().get_page(0)
         if len(tags) > 0:
             commit = str(tags[0].commit.sha)
-            date = repo.get_commit(commit).commit.committer.date.strftime("%Y-%m-%dT%H:%M:%SZ")
+            date = repo.get_commit(commit).commit.committer.date.strftime("%Y%m%d%H%M")
             return commit, date
         else:
             logger.warning('Can not find git tags')
-            return 'None', repo.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
+            return 'None', repo.created_at.strftime("%Y%m%d%H%M")
 
-    def get_pull_requests_since(self, owner: str, name: str, since: str):
+    def get_pull_requests_during(self, owner: str, name: str, since: str, until: str = None) -> [str]:
         """
-        Get all pull requests since a certain commit.
+        Get all pull requests' URLs between two commits.
 
-        :param owner: the owner of the repository.
-        :param name: the name of the repository.
-        :param since: the commit hash to start from, in GitTimestamp format.
-        :return:
+        Args:
+            owner: the owner of the repository.
+            name: the name of the repository.
+            since: the beginning time or date for fetching PRs, in GitTimestamp format.
+            until: the ending time or date for fetching PRs, in GitTimestamp format.
+
+        Returns:
+
         """
+
         query = """
-        query($owner : String!, $name: String!, $since: GitTimestamp!) {
-          repository(name: $name, owner: $owner) {
-            defaultBranchRef {
-              target {
-                ... on Commit {
-                  history(since: $since) {
-                    nodes {
-                      oid
-                      associatedPullRequests(first: 1) {
+            query($owner : String!, $name: String!, $since: GitTimestamp!, $until: GitTimestamp!) {
+              repository(name: $name, owner: $owner) {
+                defaultBranchRef {
+                  target {
+                    ... on Commit {
+                      history(since: $since, until: $until) {
                         nodes {
-                          url
+                          oid
+                          associatedPullRequests(first: 1) {
+                            nodes {
+                              url
+                            }
+                          }
                         }
                       }
                     }
@@ -159,16 +177,33 @@ class Client(AbstractClient):
                 }
               }
             }
-          }
-        }
-        """
+            """
+
+        if until is None:
+            until = datetime.now().strftime("%Y%m%d%H%M")
 
         variables = {
             "owner": owner,
             "name": name,
-            "since": since
+            "since": convert_to_git_timestamp(since),
+            "until": convert_to_git_timestamp(until)
         }
-        return self.query_with_variables(query, variables)
+
+        ret = []
+        try:
+            data = self.__query_graphql_api(query, variables)
+            commits = data.get('data').get('repository').get('defaultBranchRef').get('target').get('history').get(
+                'nodes')
+            logger.debug(f'{len(commits)} commits from {since} to {until}')
+
+            for commit in commits:
+                if has_related_pull_request(commit):
+                    url = commit.get('associatedPullRequests').get('nodes')[0].get('url')
+                    ret.append(url)
+        except Exception as e:
+            logger.error(f"Error while fetching PRs' URLs from {since} to {until}: {e}")
+        finally:
+            return ret
 
     def get_template_content(self, owner: str, name: str) -> str:
         """
