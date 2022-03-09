@@ -20,8 +20,8 @@ from summarizer.pg_network.utils import all_same
 
 data = {
     'title': 'test',
-    'bodyText': 'test',
-    'commits': {'nodes': [{'commit': {'message': 'test'}}]}
+    'desc': 'test',
+    'commits': ['test']
 }
 
 PR_NUM = 4
@@ -30,7 +30,7 @@ PR_NUM = 4
 def prepare_data():
     ret = []
     for i in range(PR_NUM):
-        pr = PullRequest('test', 'test')
+        pr = PullRequest('test')
         pr.set_data(data)
         ret.append(pr)
     return ret

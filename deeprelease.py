@@ -13,9 +13,11 @@
 # limitations under the License.
 
 """The entrance of DeepRelease."""
+import configparser
 import os
 import sys
 import time
+from datetime import datetime
 
 import fire
 from loguru import logger
@@ -30,64 +32,101 @@ from summarizer.pg_network.summarizer import EntrySummarizer
 class DeepRelease:
     """DeepRelease CLI."""
 
-    def __init__(self):
-        logger.remove()
-        logger.add(sink=sys.stderr, format="<level>{level}: {message}</level>", level='INFO')
+    def __init__(self, debug=False, config=''):
+        """
+        Args:
+            debug: whether to print debug information.
 
+        Returns:
+            None.
+        """
+        logger.remove()
+        if debug:
+            logger.add(sink=sys.stderr, level='DEBUG')
+        else:
+            logger.add(sink=sys.stderr, format="<level>{level}: {message}</level>", level='INFO')
+
+        self.debug = debug
+        self.config = configparser.ConfigParser()
+        self.config.read(config)
         self.initialize = False
         self.collector = None
         self.summarizer = None
         self.discriminator = None
         self.generator = None
 
-    def initialize_components(self):
+    def __initialize_components(self):
         """Initialize DeepRelease's components."""
+        if self.initialize:
+            return
+
         beg = time.time()
 
-        if self.initialize is not True:
-            token = os.getenv('GITHUB_TOKEN')
-            if token is None:
-                logger.error('The env variable GITHUB_TOKEN is not set!')
-                exit(1)
-
-            client = Client(token)
-
-            self.collector = PullRequestsCollector(client)
+        if self.config.has_option('summarizer', 'model_path'):
+            self.summarizer = EntrySummarizer(model_path=self.config['summarizer']['model_path'])
+        else:
             self.summarizer = EntrySummarizer()
-            self.discriminator = CategoryDiscriminator()
-            self.generator = MarkdownGenerator()
-            self.initialize = True
 
+        if self.config.has_option('discriminator', 'model_path'):
+            self.discriminator = CategoryDiscriminator(model_path=self.config['discriminator']['model_path'])
+        else:
+            self.discriminator = CategoryDiscriminator()
+
+        self.generator = MarkdownGenerator()
+        self.initialize = True
         logger.debug(f'Initialize components took {time.time() - beg:.2f} seconds')
 
     @logger.catch
-    def run(self, repo='', save_dir='.', save_name='release.md', debug=False, **kwargs):
+    def collect(self, repo: str, since: str = None, until: str = None):
+        """
+        Collect pull requests from GitHub.
+
+        Args:
+            repo: the repository name.
+            since: the beginning time or date for fetching data, in `%Y%m%d%H%M` format.
+            until: the ending time or date for fetching PRs, in `%Y%m%d%H%M` format.
+
+        Returns:
+            A list of pull requests.
+        """
+        if self.collector is None:
+            token = os.getenv('GITHUB_TOKEN')
+            if token is None:
+                logger.error('The env variable GITHUB_TOKEN is not set')
+                exit(1)
+            self.collector = PullRequestsCollector(Client(token))
+
+        if not validate_date_format(since) or not validate_date_format(until):
+            logger.error('Invalid date format, should be in %Y%m%d%H%M format')
+            exit(1)
+
+        beg = time.time()
+        owner, name = split_owner_repo(repo)
+        prs = self.collector.get_all_during(owner, name, since, until)
+        if prs is None or len(prs) == 0:
+            logger.error('No PRs to process!')
+            exit(0)
+        logger.info(f'{len(prs)} PR(s) are collected and preprocessed in {time.time() - beg:.2f} seconds')
+
+        return prs
+
+    @logger.catch
+    def run(self, repo: str, save_dir='.', save_name='release.md', since: str = None, until: str = None):
         """Run DeepRelease.
 
         Args:
+            repo: the repository name.
             save_name: the name of the generated file.
             save_dir: where to save the generated file.
-            repo: the name of the repo.
-            debug: whether to enable debug mode.
+            since: the beginning time or date for fetching data, in `%Y%m%d%H%M` format.
+            until: the ending time or date for fetching PRs, in `%Y%m%d%H%M` format.
 
         Returns:
             None.
         """
-        if debug:
-            logger.remove()
-            logger.add(sink=sys.stderr, level='DEBUG')
+        self.__initialize_components()
 
-        owner, name = split_owner_repo(repo)
-
-        self.initialize_components()
-
-        collect_beg = time.time()
-        prs = self.collector.get_all_since_last_release(owner, name)
-        if prs is None or len(prs) == 0:
-            logger.error('No PRs to process!')
-            exit(0)
-        logger.info(
-            f'{len(prs)} pull request(s) are collected and preprocessed in {time.time() - collect_beg:.2f} seconds')
+        prs = self.collect(repo, since, until)
 
         summarize_beg = time.time()
         entries = self.summarizer.summarize(prs)
@@ -119,6 +158,25 @@ def split_owner_repo(repo):
         logger.error(f'The repo name {repo} is invalid, should be <owner>/<name>!')
         exit(1)
     return lst[0], lst[1]
+
+
+def validate_date_format(date_str):
+    """Validate the date format.
+
+    Args:
+        date_str: the date string.
+
+    Returns:
+        True if the date string is valid.
+    """
+    if date_str is None:
+        return True
+
+    try:
+        datetime.strptime(str(date_str), '%Y%m%d%H%M')
+        return True
+    except ValueError:
+        return False
 
 
 if __name__ == '__main__':

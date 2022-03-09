@@ -14,7 +14,7 @@
 
 import pytest
 
-from deeprelease import split_owner_repo
+from deeprelease import split_owner_repo, validate_date_format
 
 
 @pytest.mark.parametrize("test_input,expected", [
@@ -23,3 +23,15 @@ from deeprelease import split_owner_repo
 ])
 def test_split_owner_repo(test_input, expected):
     assert split_owner_repo(test_input) == expected
+
+
+@pytest.mark.parametrize("date,expected", [
+    ("", False),
+    ("test", False),
+    (None, True),
+    ("202210142230", True),
+    ("2022101422301", False),
+    ("20221014", False),
+])
+def test_validate_date_format(date, expected):
+    assert validate_date_format(date) == expected

@@ -20,12 +20,17 @@ class Collector(ABC):
         self.client = client
 
     @abstractmethod
-    def get_all_since_last_release(self, owner, name):
+    def get_all_during(self, owner: str, name: str, since: str, until: str):
         """
-        Get all releases data since the last release.
+        Get all releases data during the specified time period.
 
-        :param owner: the owner of the repository.
-        :param name: the name of the repository.
-        :return:
+        Args:
+            owner:
+            name:
+            since:
+            until:
+
+        Returns:
+
         """
         pass

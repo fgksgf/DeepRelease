@@ -23,11 +23,13 @@ from entity.pull_request import PullRequest
 
 fasttext.FastText.eprint = lambda x: None
 
+MODEL_PATH = '/models/fasttext.bin'
+
 
 class CategoryDiscriminator(Discriminator):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        model_path = kwargs.get('model_path', '/models/fasttext.bin')
+        model_path = kwargs.get('model_path', MODEL_PATH)
         if not os.path.exists(model_path):
             logger.error(f'The Discriminator model file {model_path} does not exist')
             exit(1)

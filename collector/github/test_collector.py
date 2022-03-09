@@ -19,19 +19,31 @@ from collector.github.collector import PullRequestsCollector
 
 
 class MockClient(AbstractClient):
-    def get_last_release(self, owner: str, name: str) -> Tuple[str, str]:  # noqa
-        return '', ''
+    def get_pull_requests_during(self, owner: str, name: str, since: str, until: str = None) -> [str]:
+        return ["https://github.com/apache/skywalking-python/pull/175",
+                "https://github.com/apache/skywalking-python/pull/161"]
 
-    def get_pull_requests_since(self, owner: str, name: str, since: str):  # noqa
-        return {"data":{"repository":{"defaultBranchRef":{"target":{"history":{"nodes":[{"oid":"53066d8ccadbe3d6b3e5d534e8e2aade77fec15d","associatedPullRequests":{"nodes":[{"url":"https://github.com/apache/skywalking-python/pull/175"}]}},{"oid":"91c315b2b618c39fe534c299618efb0bf42a6e8b","associatedPullRequests":{"nodes":[{"url":"https://github.com/apache/skywalking-python/pull/161"}]}}]}}}}}} # noqa
+    def get_last_release(self, owner: str, name: str) -> Tuple[str, str]:  # noqa
+        return 'test', 'test'
 
     def get_pull_request_info(self, owner, name, num):  # noqa
-        return {"data":{"repository":{"pullRequest":{"commits":{"nodes":[{"commit":{"message":"fix aiohttp outgoing request url"}},{"commit":{"message":"Merge branch 'master' into master"}}]},"title":"fix aiohttp outgoing request url","bodyText":"Minor bugfix."}}}} # noqa
+        return {
+            "title": "fix aiohttp outgoing request url",
+            "desc": "Minor bugfix.",
+            "commits":
+                [
+                    "fix aiohttp outgoing request url",
+                    "Merge branch 'master' into master"
+                ]
+        }
 
 
-def test_get_all_since_last_release():  # noqa
+class TestPullRequestsCollector:
     client = MockClient()
     prc = PullRequestsCollector(client)
-    prs = prc.get_all_since_last_release('test', 'test')
-    assert len(prs) == 1
-    assert prs[0].owner == 'apache' and prs[0].name == 'skywalking-python'
+
+    def test_get_all_during(self):
+        prs = self.prc.get_all_during('test', 'test')
+        assert len(prs) == 2
+        assert prs[0].owner == 'apache' and prs[0].name == 'skywalking-python' and prs[0].number == 175
+        assert prs[1].owner == 'apache' and prs[1].name == 'skywalking-python' and prs[1].number == 161

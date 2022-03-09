@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from datetime import datetime
 import re
 
 PR_URL_PATTERN = re.compile(r'https://github\.com/[0-9a-z\-]+/[0-9a-zA-Z\-]+/pull/\d+')
@@ -30,3 +31,14 @@ def pull_request_url_is_valid(url: str):
 def has_related_pull_request(commit: dict):
     """Checks if the pull request has a related pull request."""
     return len(commit.get('associatedPullRequests').get('nodes')) > 0
+
+
+def convert_to_git_timestamp(timestamp: str) -> str:
+    """
+    Converts the timestamp to a git timestamp.
+
+    :param timestamp: The timestamp to convert.
+    :return: The git timestamp.
+    """
+    date = datetime.strptime(str(timestamp), '%Y%m%d%H%M')
+    return date.strftime("%Y-%m-%dT%H:%M:%SZ")
