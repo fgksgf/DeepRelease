@@ -34,6 +34,7 @@ class PullRequestsCollector(Collector):
 
         prs = []
         urls = self.client.get_pull_requests_during(owner, name, since, until)
+        logger.debug(f"Got PR(s): {urls}")
         for url in urls:
             try:
                 pr = PullRequest(url)
